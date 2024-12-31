@@ -1,0 +1,10 @@
+query Token30MinuteDatas($tokenId: ID) {
+  token30MinuteDatas(where: { token_: { id: $tokenId } }) {
+    high
+    low
+    open
+    close
+    volume
+    periodStartUnix
+  }
+}

@@ -1,0 +1,15 @@
+query GetAllPools {
+  pools {
+    id
+    token1 {
+      id
+      name
+      symbol
+    }
+    token0 {
+      id
+      name
+      symbol
+    }
+  }
+}

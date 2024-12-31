@@ -1,0 +1,32 @@
+query PoolDayDatas($poolId: ID) {
+  poolDayDatas(where: { pool_: { id: $poolId } }) {
+    low
+    open
+    close
+    high
+    liquidity
+    date
+    sqrtPrice
+    tick
+    token0Price
+    token1Price
+    tvlUSD
+    volumeToken0
+    volumeToken1
+    volumeUSD
+    txCount
+    pool {
+      id
+      token0 {
+        id
+        name
+        symbol
+      }
+      token1 {
+        id
+        name
+        symbol
+      }
+    }
+  }
+}

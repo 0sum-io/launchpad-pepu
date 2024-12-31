@@ -1,0 +1,28 @@
+query LastSwap {
+  swaps(first: 10, orderBy: timestamp, orderDirection: desc) {
+    amount0
+    amount1
+    amountUSD
+    id
+    logIndex
+    origin
+    recipient
+    sender
+    sqrtPriceX96
+    tick
+    timestamp
+    pool {
+      id
+      token0 {
+        id
+        name
+        symbol
+      }
+      token1 {
+        id
+        name
+        symbol
+      }
+    }
+  }
+}

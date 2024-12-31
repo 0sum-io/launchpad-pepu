@@ -1,0 +1,37 @@
+query SwapHistory($poolId: ID, $skip: Int) {
+  swaps(
+    where: { pool_: { id: $poolId } }
+    skip: $skip
+    first: 10
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    amount0
+    amount1
+    amountUSD
+    id
+    logIndex
+    origin
+    recipient
+    sender
+    sqrtPriceX96
+    tick
+    timestamp
+    transaction {
+      id
+    }
+    pool {
+      id
+      token0 {
+        id
+        name
+        symbol
+      }
+      token1 {
+        id
+        name
+        symbol
+      }
+    }
+  }
+}

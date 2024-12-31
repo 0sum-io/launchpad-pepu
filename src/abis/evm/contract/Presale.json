@@ -1,0 +1,140 @@
+[
+  {
+    "type": "function",
+    "name": "canDistribute",
+    "inputs": [
+      { "name": "distributor", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "distribute",
+    "inputs": [
+      { "name": "distributor", "type": "address", "internalType": "address" },
+      { "name": "deadline", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getProgress",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRaisedAmount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "info",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct IPresale.PresaleInfo",
+        "components": [
+          { "name": "minter", "type": "address", "internalType": "address" },
+          { "name": "token", "type": "address", "internalType": "address" },
+          { "name": "pool", "type": "address", "internalType": "address" },
+          {
+            "name": "paymentToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "amountToRaise",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "amountToSale",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          { "name": "data", "type": "string", "internalType": "string" },
+          {
+            "name": "toTreasuryRate",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          { "name": "isEnd", "type": "bool", "internalType": "bool" },
+          {
+            "name": "startTimestamp",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          { "name": "isNewToken", "type": "bool", "internalType": "bool" }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isBondingCurveEnd",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isEnd",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isExpired",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "onERC721Received",
+    "inputs": [
+      { "name": "operator", "type": "address", "internalType": "address" },
+      { "name": "from", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes4", "internalType": "bytes4" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "tokenInfo",
+    "inputs": [],
+    "outputs": [
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "string", "internalType": "string" },
+      { "name": "", "type": "string", "internalType": "string" },
+      { "name": "", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  { "type": "event", "name": "Distributed", "inputs": [], "anonymous": false },
+  {
+    "type": "event",
+    "name": "Initialized",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  }
+]

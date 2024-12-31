@@ -1,0 +1,19 @@
+query PoolPriceAndVolume {
+  pools {
+    id
+    volumeToken0
+    volumeToken1
+    token0Price
+    token1Price
+    token1 {
+      id
+      name
+      symbol
+    }
+    token0 {
+      id
+      name
+      symbol
+    }
+  }
+}

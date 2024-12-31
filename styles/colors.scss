@@ -1,0 +1,21 @@
+@import "@boxfoxs/bds-common";
+
+@function convert-name($string) {
+  @return --adaptive#{to-upper-case(str-slice($string, 0, 1))}#{str-slice(
+      $string,
+      2
+    )};
+}
+
+.light {
+  @each $name, $glyph in $adaptive-colors-light {
+    #{convert-name($name)}: #{$glyph};
+  }
+}
+
+.dark {
+  @each $name, $glyph in $adaptive-colors-dark {
+    $name2: convert-name($name);
+    #{$name2}: #{$glyph};
+  }
+}

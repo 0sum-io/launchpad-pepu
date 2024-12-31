@@ -1,0 +1,18 @@
+query GetAllPresales {
+  presales {
+    id
+    data
+    name
+    pairAddress
+    paymentToken
+    presaleAmount
+    saleAmount
+    symbol
+    token
+    totalSupply
+    transactionHash
+    blockTimestamp
+    blockNumber
+    minter
+  }
+}

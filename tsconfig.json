@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "preserve",
+    "lib": ["dom", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "target": "esnext",
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noImplicitAny": false,
+    "baseUrl": "src",
+    "paths": {
+      "abis": ["src/abis/*"],
+      "containers": ["src/containers/*"],
+      "components": ["src/components/*"],
+      "hooks": ["src/hooks/*"],
+      "types": ["src/types/*"],
+      "utils": ["src/utils/*"],
+      "helpers": ["src/helpers/*"],
+      "constants": ["src/constants/*"],
+      "contracts": ["src/contracts/*"],
+      "remotes": ["src/remotes/*"],
+      "pages": ["src/pages/*"],
+      "models": ["src/models/*"]
+    },
+    "incremental": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "react/display-name": "off",
+    "react/jsx-key": "off",
+    "@next/next/no-img-element": "off",
+    "react-hooks/exhaustive-deps": "off"
+  },
+  "extends": "next/core-web-vitals"
+}

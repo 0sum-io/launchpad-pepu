@@ -1,0 +1,12 @@
+query HolderQuery($tokenId: ID) {
+  accountBalances(
+    where: { token_: { id: $tokenId } }
+    orderBy: amount
+    orderDirection: desc
+  ) {
+    account {
+      address
+    }
+    amount
+  }
+}
