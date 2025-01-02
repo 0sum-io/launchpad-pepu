@@ -103,13 +103,6 @@ export function Step3({ prevStep }: Props) {
   return (
     <List divider={<Spacing height={isMobile ? 32 : 40} />}>
       <div>
-        <Flex.CenterVertical>
-          <Step>STEP 3</Step>
-          <Spacing width={isMobile ? 10 : 12} />
-          <SubTitle>Set up details</SubTitle>
-        </Flex.CenterVertical>
-      </div>
-      <div>
         <Label>Website</Label>
         <Spacing height={12} />
         <ChainInput

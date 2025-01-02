@@ -30,10 +30,10 @@ export default function CreatePresalePage() {
       <FadeAnimation>
         <Spacing height={isMobile ? 60 : 104} />
         <ContentContainer>
-          <Title>List Presale Token</Title>
+          <Title>CREATE TOKEN</Title>
           <Spacing height={isMobile ? 4 : 16} />
           <Description>
-            Your token will be listed once you submit your token info.
+            {/* Your token will be listed once you submit your token info. */}
           </Description>
           <Spacing height={32} />
           <PresaleForm />

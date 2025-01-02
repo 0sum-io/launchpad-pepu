@@ -26,13 +26,6 @@ export function Step1({ nextStep }: Props) {
   return (
     <List divider={<Spacing height={isMobile ? 32 : 40} />}>
       <div>
-        <Flex.CenterVertical>
-          <Step>STEP 1</Step>
-          <Spacing width={isMobile ? 10 : 12} />
-          <SubTitle>Set up basic information</SubTitle>
-        </Flex.CenterVertical>
-      </div>
-      <div>
         <Label>Token name</Label>
         <Spacing height={12} />
         <ChainInput
@@ -52,19 +45,6 @@ export function Step1({ nextStep }: Props) {
           error={form.error.symbol}
         />
       </div>
-      <ConnectButton
-        onClick={handleNext}
-        textSize={19}
-        rounded={16}
-        theme="primary"
-        style={{
-          height: isMobile ? "56px" : "62px",
-          width: isMobile ? "100%" : "160px",
-          marginLeft: "auto",
-        }}
-      >
-        Next
-      </ConnectButton>
     </List>
   );
 }

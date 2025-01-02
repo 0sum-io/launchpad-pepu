@@ -36,8 +36,8 @@ const Loader = styled(Flex.Center)<Props>`
   position: absolute;
   width: 80%;
   height: 100%;
-  border-top: 4px solid black;
-  border-bottom: 4px solid black;
+  border: 4px solid black;
+  border-radius: 999px;
   ${(p) => {
     const colorSet = getColorSet(p.theme);
     return `background: ${colorSet.background}`;
