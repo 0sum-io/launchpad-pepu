@@ -174,7 +174,7 @@ export function Steps() {
             theme="primary"
             style={{
               height: "62px",
-              width: "280px",
+              width: "100%",
             }}
             onClick={cta.callback}
             loading={cta.isLoading}

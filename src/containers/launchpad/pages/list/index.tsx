@@ -2,7 +2,7 @@ import { inDesktop, Spacing, useCheckIsMobile } from "@boxfoxs/bds-web";
 import styled from "@emotion/styled";
 import { PageContainer } from "components/PageContainer";
 import { useSortedPresaleList } from "../../hooks/useSortedPresaleList";
-import { OrderSection, SaleCard, TitleSection } from "./components";
+import { OrderSection, SaleCard, TitleSection, FeaturedSection } from "./components";
 import { useMemo, useState } from "react";
 
 export default function HomePage() {
@@ -39,6 +39,7 @@ export default function HomePage() {
           <Spacing height={isMobile ? 48 : 64} />
           <OrderSection keyword={keyword} onKeywordChange={setKeyword} />
           <Spacing height={48} />
+          <FeaturedSection />
           <GridListContainer>
             {list?.map((presale) => (
               <a href={`/${presale.token}`} key={presale.token}>

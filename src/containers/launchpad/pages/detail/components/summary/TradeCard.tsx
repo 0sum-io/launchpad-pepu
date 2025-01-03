@@ -121,11 +121,13 @@ export function TradeCard({ presale }: { presale: ParsedPresale }) {
       <Spacing height={28} />
       <Flex.CenterVertical>
         <ConnectButton
+          textSize={19}
+          rounded={16}
           theme="primary"
-          rounded={10}
-          textSize={isMobile ? 15 : 17}
-          fullWidth
-          style={{ height: "54px" }}
+          style={{
+            height: "62px",
+            width: "100%",
+          }}
           onClick={swap.callback}
           loading={swap.isLoading}
         >

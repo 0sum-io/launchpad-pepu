@@ -34,10 +34,11 @@ export function ConnectButton(props: Props) {
 
 const Loader = styled(Flex.Center)<Props>`
   position: absolute;
-  width: 80%;
   height: 100%;
-  border: 4px solid black;
+  width: 100%;
   border-radius: 999px;
+  border-top: 4px solid black;
+  border-bottom: 4px solid black;
   ${(p) => {
     const colorSet = getColorSet(p.theme);
     return `background: ${colorSet.background}`;
