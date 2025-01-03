@@ -23,6 +23,8 @@ export function FeaturedSection() {
         : data.volumeToken0;
       return { ...i, mc };
     });
+    // fetch last swap data
+    fetchData(withMC);
     const interval = setInterval(() => {
       console.log("fetching data");
       fetchData(withMC);
