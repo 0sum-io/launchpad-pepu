@@ -10,10 +10,5 @@ export function PresaleForm() {
 }
 
 const FormContainer = styled.div`
-  padding: 32px 24px;
-
-  border-radius: 18px;
-  border: 4px solid black;
-  background-color: rgb(48, 104, 185);
-  box-shadow: rgb(0, 0, 0) 4px 4px;
+  padding: 0px 0px;
 `;

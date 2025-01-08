@@ -3,18 +3,27 @@ import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { formatDecimals } from "utils/format";
-import { hoverableStyle, pressableStyle } from "utils/style";
 import { usePresaleList } from "../../../hooks/usePresaleList";
 import { usePools } from "../../../hooks/usePools";
 import { addressIsSame } from "utils/addressIsSame";
+import { ConnectButton } from "components/Button";
+import { useRouter } from "next/router";
+import { useCheckIsMobile } from "@boxfoxs/bds-web";
+import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
+import { WalletControl } from "components/header/WalletControl";
 
 export function FeaturedSection() {
   const [data, setData] = useState(undefined);
   const presaleList = usePresaleList();
   const pools = usePools();
 
+  const router = useRouter();
+  const isMobile = useCheckIsMobile();
+  const form = useCreatePresaleState();
+
   useEffect(() => {
     if (!presaleList.data || !pools.data) return;
+
     // derive market cap from pools and presales
     const withMC = presaleList.data.map((i) => {
       const data = pools.data.find((v) => addressIsSame(v.id, i.pairAddress));
@@ -25,27 +34,30 @@ export function FeaturedSection() {
     });
     // fetch last swap data
     fetchData(withMC);
+
     const interval = setInterval(() => {
       console.log("fetching data");
       fetchData(withMC);
     }, 5000);
+
     return () => clearInterval(interval);
   }, [presaleList.data, pools.data]);
 
   // fetch data from graphql
   const fetchData = async (withMC) => {
     const query = `
-    query LastSwap {
-      swaps(first: 1, orderBy: timestamp, orderDirection: desc) {
-        token0 {
-          name
-          id
-          volume
-          symbol
+        query LastSwap {
+          swaps(first: 1, orderBy: timestamp, orderDirection: desc) {
+            token0 {
+              name
+              id
+              volume
+              symbol
+            }
+          }
         }
-      }
-    }
-`;
+    `;
+
     const json = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
       method: "POST",
       headers: {
@@ -53,9 +65,11 @@ export function FeaturedSection() {
       },
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
+
     const presale = withMC.find(
       (i) => i.token === json.data.swaps[0].token0.id
     );
+
     setData({
       id: json.data.swaps[0].token0.id,
       name: json.data.swaps[0].token0.name,
@@ -70,59 +84,107 @@ export function FeaturedSection() {
 
   return (
     data && (
-      <a href={data?.id}>
         <Container className="FeaturedSection">
-          <Featured>FEATURED</Featured>
-          <Flex.CenterHorizontal>
-            <StyledImage src={data?.data.iconUrl} />
-            <Spacing width={32} />
-            <div style={{ flex: 1 }}>
-              <Spacing height={6} />
-              <Title>
-                {data?.name} ({data?.symbol})
-              </Title>
-              <Content>{data?.data.description}</Content>
-              <Spacing height={20} />
-              <Amount>
-                {`${commaizeNumber(Number(formatDecimals(data.marketCap, 6)))}`}
-                {` ${process.env.NEXT_PUBLIC_CHAIN_SYMBOL}`}
-              </Amount>
-              <Content>MARKET CAP</Content>
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            
+            <WalletControl />
+
+            <div>
+              <Featured>FEATURED</Featured>
+              <a href={data?.id}>
+                <Flex.CenterHorizontal style={{ zIndex: "1" }}>
+                  <StyledImage src={data?.data.iconUrl} />
+                  <Spacing width={32} />
+
+                  <div style={{ flex: 1 }}>
+                    <Spacing height={6} />
+                    <Title>
+                      {data?.name} ({data?.symbol})
+                    </Title>
+                    <Spacing height={12} />
+
+                    <SubContainer>
+                      {/* <Amount>
+                        {`${commaizeNumber(Number(formatDecimals(data.marketCap, 6)))}`}
+                        {` ${process.env.NEXT_PUBLIC_CHAIN_SYMBOL}`}
+                      </Amount> */}
+                      <Amount>
+                        $1,837,344.22
+                      </Amount>
+                      <Content style={{ paddingLeft: '10px', color: '#FFF' }}>MARKET CAP</Content>
+                    </SubContainer>
+
+                    <Content style={{ color: '#2eb335', fontWeight: '700', height: '30px' }}>+$866,308.32 (2,801.22%)</Content>
+                    <LiveNowContainer>
+                      <div className="live-dot"></div>
+                      <span style={{ paddingTop: '2px' }}>LIVE NOW</span>
+                    </LiveNowContainer>
+
+                    {/* <Content>{data?.data.description}</Content>
+                    <Spacing height={20} /> */}
+
+                  </div>
+                </Flex.CenterHorizontal>
+              </a>
             </div>
-          </Flex.CenterHorizontal>
+
+            <ConnectButton style={{ zIndex: "10", color: "#000" }}
+                onClick={() => {
+                  form.clear();
+                  router.push("/create");
+                }}
+                theme="primary"
+                rounded={isMobile ? 16 : 20}
+                padding={isMobile ? "16px 0" : "20px 28px"}
+                fullWidth={isMobile}
+                textSize={isMobile ? 15 : 20}
+                bold={600}
+              >
+              Create Token
+            </ConnectButton>
+          </div>
+
+          <Spacing height={32} />
+
         </Container>
-      </a>
     )
   );
 }
 
 const Container = styled.div`
-  max-width: 950px;
-  margin-bottom: 24px;
-  padding: 16px;
-  border-radius: 32px;
-  border: 4px solid #272727;
-  box-shadow: rgb(0, 0, 0) 4px 4px;
-  background: rgb(48, 104, 185);
-  backdrop-filter: blur(30px);
+  z-index: 1;
   cursor: pointer;
-  ${hoverableStyle.scale(1.02)}
-  ${pressableStyle.scale()}
   ${inDesktop(`
+    z-index: 1;
     padding: 24px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    top: 30px;
   `)}
+`;
+
+const SubContainer = styled.div`
+  display: flex;
+  align-items: baseline;
+  font-weight: 700;
+  height: 50px;
+  // -webkit-text-stroke: 1px black;
 `;
 
 const Featured = styled.div`
   color: #fff;
   font-size: 24px;
-  weight: 700;
+  font-weight: 700;
 `;
 
 const StyledImage = styled.img`
   width: 120px;
   height: 120px;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 2px solid #272727;
   object-fit: cover;
   ${inDesktop(`
     width: 204px;
@@ -131,11 +193,12 @@ const StyledImage = styled.img`
 `;
 
 const Title = styled.h3`
-  color: #fff;
+  color: #2eb335;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 36px;
+  -webkit-text-stroke: 1px black;
   ${inDesktop(`
-    font-size: 32px;
+    font-size: 36px;
   `)}
 `;
 
@@ -143,7 +206,7 @@ const Content = styled.div`
   height: 34px;
   word-break: break-all;
   color: #d5ded7;
-  font-size: 12px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: 140%; /* 19.6px */
@@ -153,7 +216,7 @@ const Content = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   ${inDesktop(`
-    font-size: 14px;
+    font-size: 16px;
     height: 60px;
     -webkit-line-clamp: 3;
   `)}
@@ -165,4 +228,39 @@ const Amount = styled.div`
   ${inDesktop(`
     font-size: 44px;
   `)}
+`;
+
+const LiveNowContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px; /* Space between dot and text */
+  font-size: 16px;
+  font-weight: bold;
+  color: #2eb335; /* Bright green color */
+  background-color: transparent;
+
+  .live-dot {
+    width: 15px;
+    height: 15px;
+    background-color: #00ff00; /* Bright green dot */
+    border-radius: 50%; /* Make it a circle */
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Glowing effect */
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Subtle glow */
+    }
+    50% {
+      transform: scale(1.5); /* Scale up the dot */
+      box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Bright glowing background */
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Return to subtle glow */
+    }
+  }
 `;

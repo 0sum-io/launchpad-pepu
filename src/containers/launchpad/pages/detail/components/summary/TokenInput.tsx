@@ -24,11 +24,11 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
   return (
     <div>
       <Flex.CenterVertical>
-        <Txt>You pay</Txt>
+        <Txt style={{ fontSize: "14px", fontWeight: "500" }}>You pay</Txt>
         <Spacing flex={1} />
         <Txt>Balance</Txt>
         <Spacing width={4} />
-        <Txt>{commaizeNumber(formatDecimals(balance, 5))}</Txt>
+        <Txt style={{ fontSize: "16px", fontWeight: "700" }}>{commaizeNumber(formatDecimals(balance, 5))}</Txt>
       </Flex.CenterVertical>
       <Spacing height={8} />
       <Container>
@@ -37,7 +37,7 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
         </TokenIcon>
         <Spacing width={12} />
         <Text
-          color="#000"
+          color="#fff"
           weight={"bold"}
           style={{ fontSize: isMobile ? "14px" : "16px", width: "50px" }}
         >
@@ -59,8 +59,8 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
 
 const Container = styled(Flex.CenterVertical)`
   position: relative;
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 16px;
+  background: #272727;
   padding: 0 16px;
   height: 62px;
 `;
@@ -68,8 +68,8 @@ const Container = styled(Flex.CenterVertical)`
 const TokenIcon = styled(Flex.Center)`
   border-radius: 100%;
   img {
-    height: 32px;
-    width: 32px;
+    height: 24px;
+    width: 24px;
     border-radius: 100%;
     object-fit: cover;
     object-position: center;
@@ -92,16 +92,17 @@ const StyledInput = styled.input`
   width: 100%;
   flex: 1;
   ${inDesktop(`
-    font-size: 16px;
+    font-size: 24px;
+    font-weight: 700;
   `)}
 `;
 
 const MaxButton = styled.button`
-  color: ${process.env.NEXT_PUBLIC_COLOR};
+  color: #fff;
   text-align: center;
   font-size: 13px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700;
   line-height: normal;
   border-radius: 24px;
   border: 1px solid var(--primary-1, ${process.env.NEXT_PUBLIC_COLOR});

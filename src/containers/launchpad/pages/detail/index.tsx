@@ -12,6 +12,7 @@ import { TradeCard } from "./components/summary/TradeCard";
 import { EVMChainId } from "models/ChainId";
 import { DefinedChart } from "./components/DefinedChart";
 import { useBondingCurveProgress } from "containers/launchpad/hooks/useBondingCurveProgress";
+import { WalletControl } from "components/header/WalletControl";
 
 export default function DetailPage() {
   const isMobile = useCheckIsMobile();
@@ -35,14 +36,21 @@ export default function DetailPage() {
     <PageContainer>
       <FadeAnimation>
         <ContentContainer>
-          <Spacing height={isMobile ? 56 : 104} />
+
+          <Spacing height={isMobile ? 25 : 35} />
           <Flex.CenterVertical
             align="start"
             direction={isMobile ? "column" : "row"}
           >
+            <div>
+              <WalletControl left="0px" />
+            </div>
+            <Spacing width={28} />
+
             <div style={{ flex: 1 }}>
               <InfoSection presale={presale} />
               <Spacing height={isMobile ? 28 : 32} />
+
               {[EVMChainId.CHAIN, EVMChainId.CHAIN].includes(
                 presale.chainId
               ) ? (
@@ -51,7 +59,9 @@ export default function DetailPage() {
                 <DefinedChart data={presale} />
               )}
             </div>
+
             <Spacing width={28} height={28} />
+            
             <div style={{ flex: 1, maxWidth: "400px", width: "100%" }}>
               <SummarySection presale={presale} />
               <Spacing height={24} />
@@ -62,9 +72,11 @@ export default function DetailPage() {
               )}
             </div>
           </Flex.CenterVertical>
+
           <Spacing height={40} />
           <StatisticsSection presale={presale} />
           <Spacing height={isMobile ? 64 : 134} />
+
         </ContentContainer>
       </FadeAnimation>
     </PageContainer>

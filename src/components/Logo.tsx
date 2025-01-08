@@ -9,11 +9,11 @@ export function Logo() {
     <Link href="/">
       <a>
         <img
-          width={isMobile ? 24 : 28}
-          height={isMobile ? 24 : 28}
+          width={isMobile ? 24 : 50}
+          height={isMobile ? 24 : 50}
           src={process.env.NEXT_PUBLIC_LOGO}
           alt="logo"
-          style={{ transform: "rotateY(180deg)" }}
+          style={{ background: "#FFF", borderRadius: "50%" }}
         />
       </a>
     </Link>

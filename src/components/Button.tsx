@@ -50,6 +50,7 @@ const StyledButton = styled.button<Props>`
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 61px;
   border-radius: ${({ rounded }) =>
     rounded === true ? "100%" : (rounded || 40) + "px"};
   font-weight: ${({ bold }) =>
@@ -58,6 +59,7 @@ const StyledButton = styled.button<Props>`
   padding: ${({ padding }) => padding || "16px 18px"};
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
   text-wrap: nowrap;
+  background: #2eb335;
   ${hoverableStyle.scale(1.02)};
   ${(p) => {
     const colorSet = getColorSet(p.theme);

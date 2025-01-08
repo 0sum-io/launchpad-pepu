@@ -44,7 +44,7 @@ const Container = styled(Flex.CenterVertical)`
 `;
 
 const ProgressHolder = styled.div<{ size: number }>`
-  background: #62626d;
+  background: #252525;
   flex: 1;
   height: ${(p) => p.size}px;
   overflow: hidden;
