@@ -54,7 +54,13 @@ export class ChainNativeCurrency extends NativeCurrency {
   }
 }
 
-export const NATIVE = {};
+export const NATIVE = {
+  [EVMChainId.CHAIN]: ChainNativeCurrency.onChain(
+    EVMChainId.CHAIN,
+    process.env.NEXT_PUBLIC_CHAIN_SYMBOL,
+    process.env.NEXT_PUBLIC_CHAIN_SYMBOL
+  )
+};
 
 export const WNATIVE = {
   [EVMChainId.CHAIN]: new Token(
