@@ -20,7 +20,7 @@ import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
 import { hoverableStyle } from "utils/style";
-import { Theme, SwapWidget } from "@uniswap/widgets";
+/* import { Theme, SwapWidget } from "@uniswap/widgets";
 
 const TOKEN_LIST = 'https://ipfs.io/ipns/tokens.uniswap.org';
 const BONDED = '0x918d6265e061de4aae9f71432155a98f833808c9';
@@ -38,7 +38,7 @@ const theme: Theme = {
   error: 'red',
   success: 'green',
   borderRadius: 16
-}
+} */
 
 interface Props {
   presale: ParsedPresale;
@@ -135,7 +135,7 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       </Text>
 
       <Spacing height={24} />
-      <SwapWidget 
+      {/* <SwapWidget 
         tokenList={TOKEN_LIST}
         defaultInputTokenAddress="NATIVE"
         defaultInputAmount="1"
@@ -143,7 +143,7 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
         theme={theme} 
         provider={useProvider()}
       />
-      <Spacing height={24} />
+      <Spacing height={24} /> */}
 
       <Text size="lg" color={colors.white} weight="semibold" style={{ textAlign: "center" }}>
         Or
