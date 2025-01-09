@@ -86,12 +86,14 @@ export function FeaturedSection() {
     data && (
         <Container className="FeaturedSection">
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={isMobile ? 
+            { display: "flex", justifyContent: "space-between", flexDirection: "column", alignItems: "center" } : 
+            { display: "flex", justifyContent: "space-between" }}>
             
-            <WalletControl />
+            <WalletControl left={isMobile ? "0px" : "-100px"} />
 
             <div>
-              <Featured>FEATURED</Featured>
+              <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>
               <a href={data?.id}>
                 <Flex.CenterHorizontal style={{ zIndex: "1" }}>
                   <StyledImage src={data?.data.iconUrl} />
@@ -129,7 +131,7 @@ export function FeaturedSection() {
               </a>
             </div>
 
-            <ConnectButton style={{ zIndex: "10", color: "#000" }}
+            <ConnectButton style={isMobile ? {marginTop: "30px", zIndex: "10", color: "#000"} : {marginTop: "0px", zIndex: "10", color: "#000"}}
                 onClick={() => {
                   form.clear();
                   router.push("/create");

@@ -15,7 +15,7 @@ import {
   useRaisedAmount,
 } from "containers/launchpad/hooks/useBondingCurveProgress";
 import { PercentageBadge } from "containers/launchpad/pages/list/components";
-import { useTokenInfo } from "hooks/on-chain";
+import { useProvider, useTokenInfo } from "hooks/on-chain";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
@@ -140,7 +140,8 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
         defaultInputTokenAddress="NATIVE"
         defaultInputAmount="1"
         defaultOutputTokenAddress={BONDED} 
-        theme={theme}
+        theme={theme} 
+        provider={useProvider()}
       />
       <Spacing height={24} />
 
