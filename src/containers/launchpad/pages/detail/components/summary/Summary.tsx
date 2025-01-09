@@ -20,6 +20,25 @@ import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
 import { hoverableStyle } from "utils/style";
+import { Theme, SwapWidget } from "@uniswap/widgets";
+
+const TOKEN_LIST = 'https://ipfs.io/ipns/tokens.uniswap.org';
+const BONDED = '0x918d6265e061de4aae9f71432155a98f833808c9';
+
+const theme: Theme = {
+  primary: '#1F4A05',
+  secondary: '#5F7D52',
+  interactive: '#272727',
+  container: '#161616',
+  module: '#272727',
+  accent: '#8E8B78',
+  outline: '#CADDC2',
+  dialog: '#000',
+  fontFamily: "Grandstander",
+  error: 'red',
+  success: 'green',
+  borderRadius: 16
+}
 
 interface Props {
   presale: ParsedPresale;
@@ -114,13 +133,28 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       <Text size="lg" color={colors.white} weight="semibold">
         Bonding curve has ended
       </Text>
+
+      <Spacing height={24} />
+      <SwapWidget 
+        tokenList={TOKEN_LIST}
+        defaultInputTokenAddress="NATIVE"
+        defaultInputAmount="1"
+        defaultOutputTokenAddress={BONDED} 
+        theme={theme}
+      />
+      <Spacing height={24} />
+
+      <Text size="lg" color={colors.white} weight="semibold" style={{ textAlign: "center" }}>
+        Or
+      </Text>
+
       <Spacing height={24} />
       <a
         href={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?outputCurrency=${data.token}`}
         target="_blank"
         rel="noreferrer"
       >
-        <StyledBadge>Trade</StyledBadge>
+        <StyledBadge>Trade On PepuSwap</StyledBadge>
       </a>
     </Container>
   );
