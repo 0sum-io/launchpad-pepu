@@ -22,8 +22,10 @@ export function InfoSection({ presale }: Props) {
       <div style={{ padding: "8px 0" }}>
         <Name>{presale.name}</Name>
         <Spacing height={isMobile ? 8 : 12} />
+
         <Description>{presale.data.description || "-"}</Description>
         <Spacing height={8} />
+
         <BadgeContainer>
           {presale.data.websiteUrl ? (
             <a href={presale.data.websiteUrl} target="_blank" rel="noreferrer">
@@ -79,33 +81,29 @@ const BadgeContainer = styled.div`
 const Container = styled.div`
   display: flex;
   padding: 24px 24px 32px 24px;
-  border-radius: 32px;
-  border: 4px solid #272727;
-  box-shadow: rgb(0, 0, 0) 4px 4px;
-  background: rgb(48, 104, 185);
-  backdrop-filter: blur(30px);
 `;
 
 const StyledImage = styled.img`
   width: 88px;
   height: 88px;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 2px solid #272727;
   object-fit: cover;
   ${inDesktop(`
-    width: 104px;
-    height: 104px;
+    width: 204px;
+    height: 204px;
   `)}
 `;
 
 const Name = styled.div`
-  color: #fff;
+  color: #2EB335;
   font-size: 16px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 24px; /* 109.091% */
   letter-spacing: -0.1px;
   ${inDesktop(`
-    font-size: 22px;
+    font-size: 36px;
   `)}
 `;
 
@@ -116,6 +114,6 @@ const Description = styled.div`
   font-weight: 400;
   line-height: 140%; /* 22.4px */
   ${inDesktop(`
-    font-size: 16px;
+    font-size: 15px;
   `)}
 `;

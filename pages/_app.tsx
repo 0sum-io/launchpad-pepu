@@ -9,6 +9,8 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { RecoilRoot } from "recoil";
 import "../styles/globals.scss";
 import Head from "next/head";
+import LatestPurchasesTicker from "containers/launchpad/pages/list/components/LatestPurchases";
+import NewListingsTicker from "containers/launchpad/pages/list/components/NewListings";
 
 const client = new QueryClient({
   defaultOptions: {
@@ -38,21 +40,23 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
       <RootProvider>
-        <RecoilRoot>
-          <QueryClientProvider client={client}>
-            <RootStateProvider>
-              <PortalProvider>
-                <SnackBarProvider>
-                  <PopupProvider>
-                    <RootContainer>
-                      <Component {...pageProps} />
-                    </RootContainer>
-                  </PopupProvider>
-                </SnackBarProvider>
-              </PortalProvider>
-            </RootStateProvider>
-          </QueryClientProvider>
-        </RecoilRoot>
+        <LatestPurchasesTicker />
+          <RecoilRoot>
+            <QueryClientProvider client={client}>
+              <RootStateProvider>
+                <PortalProvider>
+                  <SnackBarProvider>
+                    <PopupProvider>
+                      <RootContainer>
+                        <Component {...pageProps} />
+                      </RootContainer>
+                    </PopupProvider>
+                  </SnackBarProvider>
+                </PortalProvider>
+              </RootStateProvider>
+            </QueryClientProvider>
+          </RecoilRoot>
+        <NewListingsTicker />
       </RootProvider>
     </ColorModeProvider>
   );
@@ -67,12 +71,12 @@ const RootContainer = styled.div`
   *::-webkit-scrollbar {
     width: 0px;
     height: 0px;
-    display: none;
   }
   min-height: 100vh;
   transition: background 300ms;
 
-  background-image: url("https://pepeunchained.com/assets/images/banner.png");
+  // background-image: url("https://pepeunchained.com/assets/images/banner.png");
+  background-color: #0f0f0f;
   background-size: cover;
   background-position: center;
 `;

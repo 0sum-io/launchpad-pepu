@@ -28,14 +28,13 @@ export default function CreatePresalePage() {
         </div>
       )}
       <FadeAnimation>
-        <Spacing height={isMobile ? 60 : 104} />
+        <Spacing height={isMobile ? 25 : 35} />
         <ContentContainer>
           <Title>CREATE TOKEN</Title>
           <Spacing height={isMobile ? 4 : 16} />
           <Description>
             {/* Your token will be listed once you submit your token info. */}
           </Description>
-          <Spacing height={32} />
           <PresaleForm />
         </ContentContainer>
         <Spacing height={isMobile ? 60 : 168} />
@@ -88,16 +87,9 @@ const ContentContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 32px; /* 128.571% */
-  font-size: 70px;
-  line-height: 72px; /* 128.571% */
-
-  color: ${process.env.NEXT_PUBLIC_COLOR};
-  -webkit-text-stroke-width: 4px;
-  -webkit-text-stroke-color: black;
-  font-family: Grandstander-Black;
+  color: #fff;
 `;
 
 const Description = styled.div`

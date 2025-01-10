@@ -27,9 +27,9 @@ export namespace Input {
     gap: 16px;
     width: 100%;
     height: 52px;
-    border-radius: 18px;
-    border: 4px solid black;
-    background-color: rgb(48, 104, 185);
+    border-radius: 25px;
+    border: 2px solid #2f2f2f;
+    background: #272727;
   `;
 
 // change search input placeholder color

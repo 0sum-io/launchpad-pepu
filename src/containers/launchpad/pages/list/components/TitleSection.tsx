@@ -4,6 +4,7 @@ import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
 import { Badge } from "../../create/components/Components";
+import { WalletControl } from "components/header/WalletControl";
 
 export function TitleSection() {
   const router = useRouter();
@@ -17,7 +18,8 @@ export function TitleSection() {
           {/* <Badge style={{ display: "inline-flex" }}>BETA</Badge> */}
           <Spacing height={12} />
         </div>
-        <Title>PEPE&apos;S PUMP PAD</Title>
+        <Title> {/* FEATURED */} </Title>
+        {/* <WalletControl /> */}
       </div>
       <div style={{ width: isMobile ? "100%" : "" }}>
         {/* <Description>
@@ -25,7 +27,7 @@ export function TitleSection() {
           the dawn of what&apos;s next.
         </Description> */}
         <Spacing height={24} />
-        <ConnectButton
+        {/* <ConnectButton style={{ left: "-150%"}}
           onClick={() => {
             form.clear();
             router.push("/create");
@@ -34,38 +36,44 @@ export function TitleSection() {
           rounded={isMobile ? 16 : 20}
           padding={isMobile ? "16px 0" : "20px 28px"}
           fullWidth={isMobile}
-          textSize={isMobile ? 15 : 17}
+          textSize={isMobile ? 15 : 20}
           bold={600}
         >
-          Make Token
-        </ConnectButton>
+          Create Token
+        </ConnectButton> */}
       </div>
     </Container>
   );
 }
 
 const Container = styled.div`
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   gap: 8px;
   width: 100%;
   ${inDesktop(`
+    z-index: 10;
+    position: relative;
     flex-direction: row;
     justify-content: space-between;
-    align-items: end;
+    align-items: flex-start;
+    width: 330px;
+    margin-right: auto;
+    padding-left: 130px;
+    padding-top: 30px;
   `)}
 `;
 
 const Title = styled.div`
-  font-size: 24px;
+  font-size: 48px;
   font-weight: 700;
   line-height: 32px; /* 128.571% */
-  font-size: 70px;
   line-height: 72px; /* 128.571% */
-  color: #2EB335;
-  -webkit-text-stroke-width: 4px;
-  -webkit-text-stroke-color: black;
+  color: #FFF;
+  /* -webkit-text-stroke-width: 4px;
+  -webkit-text-stroke-color: black; */
   font-family: Grandstander-Black;
 `;
 

@@ -162,9 +162,9 @@ export function TXNS({ data }: { data: ParsedPresale }) {
 
 const TableHeader = styled.th`
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 32px;
   text-align: left;
 `;
@@ -178,9 +178,9 @@ const TableBodyRow = styled.tr`
 const TableBody = styled.td<{ width?: number }>`
   padding: 16px 0;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 20px; /* 142.857% */
   width: ${(p) => p.width}px;
   border-bottom: 1px solid #272727;
