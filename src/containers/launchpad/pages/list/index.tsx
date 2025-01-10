@@ -82,7 +82,7 @@ export default function HomePage() {
             ))}
           </GridListContainer>
 
-          <ScrollButton onClick={() => handleScroll("right")}>
+          <ScrollButton onClick={() => handleScroll("right")} style={isMobile ? {right: "45%"} : {right: "50px"}}>
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M9 6l6 6-6 6"
@@ -190,7 +190,6 @@ const StarImage = styled.img`
 
 const ScrollButton = styled.button`
   position: absolute;
-  right: 50px; /* Adjust based on placement */
   top: 50%;
   transform: translateY(300%);
   width: 48px;
