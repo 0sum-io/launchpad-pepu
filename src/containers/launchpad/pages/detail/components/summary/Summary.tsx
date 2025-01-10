@@ -9,7 +9,6 @@ import {
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { formatEther } from "@ethersproject/units";
-import { ProgressBar } from "components/ProgressBar";
 import { chains } from "constants/chains";
 import {
   useBondingCurveProgress,
@@ -21,30 +20,12 @@ import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
 import { hoverableStyle } from "utils/style";
-/* import { Theme, SwapWidget } from "@uniswap/widgets";
-
-const TOKEN_LIST = 'https://raw.githubusercontent.com/0sum-io/tokens/refs/heads/main/pepe-unchained.json';
-
-const theme: Theme = {
-  primary: '#1F4A05',
-  secondary: '#5F7D52',
-  interactive: '#272727',
-  container: '#161616',
-  module: '#272727',
-  accent: '#8E8B78',
-  outline: '#CADDC2',
-  dialog: '#000',
-  fontFamily: "Grandstander",
-  error: 'red',
-  success: 'green',
-  borderRadius: 16
-} */
 
 interface Props {
   presale: ParsedPresale;
 }
 
-const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
+export function SummarySection({ presale }: Props) {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
@@ -78,10 +59,6 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
           {formatDecimals(progress.data || 0, 2)}%
         </PercentageBadge>
       </Flex.CenterVertical>
-
-      <Spacing height={4} />
-      <ProgressBar value={progress.data} size={5} />
-
       <Divider
         color="#272727"
         marginVertical={isMobile ? 16 : 24}
@@ -122,9 +99,7 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
       </Flex.CenterVertical>
     </Container>
   );
-};
-
-export default SummarySection;
+}
 
 const Container = styled.div`
   background-color: #161616;
@@ -139,40 +114,13 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       <Text size="lg" color={colors.white} weight="semibold">
         Bonding curve has ended
       </Text>
-
-      <Spacing height={24} />
-      {/* <SwapWidget 
-        tokenList={TOKEN_LIST}
-        defaultInputTokenAddress={`${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}`} 
-        defaultInputAmount="1"
-        defaultOutputTokenAddress={`${data.token}`} 
-        theme={theme} 
-        provider={useProvider()}
-      />
-      <Spacing height={24} /> */}
-      <iframe
-        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?inputCurrency=${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}&outputCurrency=${data.token}`}
-        height="660px"
-        width="100%"
-        style={{ 
-          margin: "0 auto",
-          marginBottom: ".5rem",
-          display: "block",
-          borderRadius: "10px"
-        }}
-      />
-
-      <Text size="lg" color={colors.white} weight="semibold" style={{ textAlign: "center" }}>
-        Or
-      </Text>
-
       <Spacing height={24} />
       <a
         href={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?outputCurrency=${data.token}`}
         target="_blank"
         rel="noreferrer"
       >
-        <StyledBadge>Trade On PepuSwap</StyledBadge>
+        <StyledBadge>Trade</StyledBadge>
       </a>
     </Container>
   );

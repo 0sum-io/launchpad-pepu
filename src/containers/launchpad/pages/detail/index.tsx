@@ -6,28 +6,13 @@ import { PageContainer } from "components/PageContainer";
 import { usePresale, usePresaleByRPC } from "containers/launchpad/hooks";
 import { Chart } from "./components/Chart";
 import { InfoSection } from "./components/Info";
-import { DeployedDexBadge } from "./components/summary";
+import { StatisticsSection } from "./components/statistics";
+import { DeployedDexBadge, SummarySection } from "./components/summary";
+import { TradeCard } from "./components/summary/TradeCard";
 import { EVMChainId } from "models/ChainId";
 import { DefinedChart } from "./components/DefinedChart";
 import { useBondingCurveProgress } from "containers/launchpad/hooks/useBondingCurveProgress";
-// import { WalletControl } from "components/header/WalletControl";
-import dynamic from 'next/dynamic';
-
-const WalletControlLazy = dynamic(() => import('../../../../components/header/WalletControl'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
-
-const TradeCard = dynamic(() => import('./components/summary/TradeCard'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
-
-const SummarySection = dynamic(() => import('./components/summary/Summary'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
-
-const StatisticsSection = dynamic(() => import('./components/statistics/Statistics'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
+import { WalletControl } from "components/header/WalletControl";
 
 export default function DetailPage() {
   const isMobile = useCheckIsMobile();
@@ -58,7 +43,7 @@ export default function DetailPage() {
             direction={isMobile ? "column" : "row"}
           >
             <div>
-              <WalletControlLazy left="0px" />
+              <WalletControl left="0px" />
             </div>
             <Spacing width={28} />
 

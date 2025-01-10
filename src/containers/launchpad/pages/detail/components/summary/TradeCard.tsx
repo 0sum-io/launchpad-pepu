@@ -23,7 +23,7 @@ import { TabItem } from "../statistics";
 import { TokenInput } from "./TokenInput";
 import { LoadingLottie } from "components/lotties/LoadingLottie";
 
-const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
+export function TradeCard({ presale }: { presale: ParsedPresale }) {
   const isMobile = useCheckIsMobile();
   const account = useAccount();
   const connect = useThirdWeb();
@@ -142,9 +142,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
       </Flex.CenterVertical>
     </Container>
   );
-};
-
-export default TradeCard;
+}
 
 const Container = styled.div`
   padding: 24px 24px 32px 24px;

@@ -10,12 +10,7 @@ import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCheckIsMobile } from "@boxfoxs/bds-web";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
-// import { WalletControl } from "components/header/WalletControl";
-import dynamic from 'next/dynamic';
-
-const WalletControlLazy = dynamic(() => import('../../../../../components/header/WalletControl'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
+import { WalletControl } from "components/header/WalletControl";
 
 export function FeaturedSection() {
   const [data, setData] = useState(undefined);
@@ -95,7 +90,7 @@ export function FeaturedSection() {
             { display: "flex", justifyContent: "space-between", flexDirection: "column", alignItems: "center" } : 
             { display: "flex", justifyContent: "space-between" }}>
             
-            <WalletControlLazy left={isMobile ? "0px" : "-100px"} />
+            <WalletControl left={isMobile ? "0px" : "-100px"} />
 
             <div>
             <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>

@@ -2,13 +2,8 @@ import { inDesktop, Spacing, useCheckIsMobile } from "@boxfoxs/bds-web";
 import styled from "@emotion/styled";
 import { PageContainer } from "components/PageContainer";
 import { useSortedPresaleList } from "../../hooks/useSortedPresaleList";
-import { OrderSection, TitleSection, FeaturedSection } from "./components";
+import { OrderSection, SaleCard, TitleSection, FeaturedSection } from "./components";
 import { useMemo, useRef, useState } from "react";
-import dynamic from 'next/dynamic';
-
-const SaleCard = dynamic(() => import('./components/SaleCard'), {
-  loading: () => <p>Loading...</p>, // Optional fallback while loading
-});
 
 export default function HomePage() {
   const isMobile = useCheckIsMobile();

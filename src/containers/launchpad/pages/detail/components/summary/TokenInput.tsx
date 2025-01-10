@@ -35,10 +35,11 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
         <TokenIcon>
           <img src={icon} alt="" />
         </TokenIcon>
+        <Spacing width={12} />
         <Text
           color="#fff"
           weight={"bold"}
-          style={{ fontSize: isMobile ? "14px" : "16px", width: "50px", fontFamily: "Grandstander", display: "s" }}
+          style={{ fontSize: isMobile ? "14px" : "16px", width: "50px" }}
         >
           {getClearedSymbol(symbol || "-")}
         </Text>
@@ -67,22 +68,21 @@ const Container = styled(Flex.CenterVertical)`
 const TokenIcon = styled(Flex.Center)`
   border-radius: 100%;
   img {
-    height: 18px;
-    width: 18px;
+    height: 24px;
+    width: 24px;
     border-radius: 100%;
     object-fit: cover;
     object-position: center;
   }
   ${inDesktop(`
-    width: 18px;
-    height: 18px;
+    padding: 8px;
+    width: 38px;
+    height: 38px;
   `)}
 `;
 
 const StyledInput = styled.input`
   background-color: transparent;
-  font-family: Grandstander;
-  color: #fff;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -94,7 +94,6 @@ const StyledInput = styled.input`
   ${inDesktop(`
     font-size: 24px;
     font-weight: 700;
-    width: 120px;
   `)}
 `;
 

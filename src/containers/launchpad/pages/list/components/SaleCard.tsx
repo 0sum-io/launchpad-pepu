@@ -15,7 +15,7 @@ import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals } from "utils/format";
 import { hoverableStyle, pressableStyle } from "utils/style";
 
-const SaleCard = ({ data }: { data: ParsedPresale }) => {
+export function SaleCard({ data }: { data: ParsedPresale }) {
   const isMobile = useCheckIsMobile();
   const router = useRouter();
   const progress = useBondingCurveProgress(data);
@@ -59,8 +59,6 @@ const SaleCard = ({ data }: { data: ParsedPresale }) => {
     </Container>
   );
 }
-
-export default SaleCard;
 
 const Container = styled.div`
   cursor: pointer;
