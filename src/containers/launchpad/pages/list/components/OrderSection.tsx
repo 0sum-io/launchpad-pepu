@@ -31,14 +31,14 @@ export function OrderSection({
 
   return (
     <Container>
-      <SorterContainer>
+      {/* <SorterContainer>
         <SelectButton value={sort} onChange={setSort} options={SORT_OPTIONS} />
         <SelectButton
           value={order}
           onChange={setOrder}
           options={ORDER_OPTIONS}
         />
-      </SorterContainer>
+      </SorterContainer> */}
       <Input.Search
         placeholder="Search tokens"
         value={keyword}
@@ -54,7 +54,7 @@ const Container = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  width: 100%;
+  width: 30%;
   ${inDesktop(`
     flex-direction: row;
     justify-content: space-between;

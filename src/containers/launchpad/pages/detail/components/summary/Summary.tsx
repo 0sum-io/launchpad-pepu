@@ -36,8 +36,8 @@ export function SummarySection({ presale }: Props) {
       <Flex.CenterVertical>
         <div>
           <Text
-            style={{ fontSize: isMobile ? "18px" : "22px", fontWeight: 600 }}
-            color={"white"}
+            style={{ fontSize: isMobile ? "18px" : "24px", fontWeight: 700, fontFamily: "Grandstander" }}
+            color={"#2EB335"}
             weight={"bold"}
           >
             {commaizeNumber(formatDecimals(raisedAmount.data || 0, 5))}
@@ -45,7 +45,7 @@ export function SummarySection({ presale }: Props) {
           <Spacing height={4} />
           <Text
             color="#fff"
-            style={{ fontSize: isMobile ? "14px" : "16px", fontWeight: 600 }}
+            style={{ fontSize: isMobile ? "14px" : "14px", fontWeight: 500, fontFamily: "Grandstander" }}
           >
             / {commaizeNumber(formatEther(presale.presaleAmount))}{" "}
             {getClearedSymbol(paymentToken.data?.symbol || "-")}
@@ -65,11 +65,11 @@ export function SummarySection({ presale }: Props) {
         width={"100%"}
       />
       <Flex.CenterVertical justify="space-between">
-        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px" }}>
+        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 400 }}>
           Token Address
         </Info>
         <Link>
-          <a
+          <a style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 700 }}
             href={`${chains[presale.chainId].blockExplorerUrls[0]}/address/${
               presale.token
             }`}
@@ -82,11 +82,11 @@ export function SummarySection({ presale }: Props) {
       </Flex.CenterVertical>
       <Spacing height={8} />
       <Flex.CenterVertical justify="space-between">
-        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px" }}>
+        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 400 }}>
           Pair Address
         </Info>
         <Link>
-          <a
+          <a style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 700 }}
             href={`${chains[presale.chainId].blockExplorerUrls[0]}/address/${
               presale.pairAddress
             }`}
@@ -102,13 +102,10 @@ export function SummarySection({ presale }: Props) {
 }
 
 const Container = styled.div`
+  background-color: #161616;
   padding: 24px 24px 32px 24px;
-
-  border-radius: 32px;
-  border: 4px solid #272727;
-  box-shadow: rgb(0, 0, 0) 4px 4px;
-  background: rgb(48, 104, 185);
-  backdrop-filter: blur(30px);
+  border-radius: 16px;
+  border: 2px solid #272727;
 `;
 
 export function DeployedDexBadge({ data }: { data: ParsedPresale }) {

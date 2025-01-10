@@ -63,10 +63,10 @@ export function TopTraders({ data }: { data?: ParsedPresale }) {
 }
 
 const TableHeader = styled.th`
-  color: #9e9ea4;
+  color: #fff;
   font-size: 14px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 16px; /* 114.286% */
   letter-spacing: -0.1px;
   text-align: left;
@@ -81,9 +81,9 @@ const TableBodyRow = styled.tr`
 const TableBody = styled.td<{ width?: number }>`
   padding: 16px 0;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 20px; /* 142.857% */
   width: ${(p) => p.width}px;
   border-bottom: 1px solid #272727;

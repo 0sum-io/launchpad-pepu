@@ -36,14 +36,7 @@ export function StatisticsSection({ presale }: { presale: ParsedPresale }) {
 }
 
 const Container = styled.div`
-  max-width: 814px;
-
   padding: 24px 24px 32px 24px;
-  border-radius: 32px;
-  border: 4px solid #272727;
-  box-shadow: rgb(0, 0, 0) 4px 4px;
-  background: rgb(48, 104, 185);
-  backdrop-filter: blur(30px);
 `;
 
 const Title = styled.div`
@@ -66,16 +59,15 @@ export const TabItem = styled.button<{ active?: boolean }>`
   padding: 24px 24px 16px;
   border-bottom: ${(p) =>
     p.active
-      ? `2px solid ${process.env.NEXT_PUBLIC_COLOR}`
-      : "1px solid #272727"};
-  color: ${(p) => (p.active ? process.env.NEXT_PUBLIC_COLOR : "#fff")};
+      ? `2px solid #fff`
+      : "1px solid #757575"};
+  color: ${(p) => (p.active ? "#fff" : "#757575")};
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   height: 57px;
   ${inDesktop(`
-    height: 71px;
-    font-size: 16px;
-    padding: 28px 24px 22px;
+    font-size: 20px;
+    padding: 0px 22px;
   `)}
 `;
 

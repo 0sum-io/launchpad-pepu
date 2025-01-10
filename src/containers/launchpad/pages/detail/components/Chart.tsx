@@ -54,11 +54,8 @@ export function Chart({ presale }: { presale: ParsedPresale }) {
 
 const Container = styled.div`
   padding: 24px 24px 32px 24px;
-  border-radius: 32px;
-  border: 4px solid #272727;
-  box-shadow: rgb(0, 0, 0) 4px 4px;
-  background: rgb(48, 104, 185);
-  backdrop-filter: blur(30px);
+  border-radius: 16px;
+  border: 2px solid #272727;
 `;
 
 const renderChart = (
