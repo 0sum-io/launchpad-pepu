@@ -15,7 +15,7 @@ import {
   useRaisedAmount,
 } from "containers/launchpad/hooks/useBondingCurveProgress";
 import { PercentageBadge } from "containers/launchpad/pages/list/components";
-import { useTokenInfo } from "hooks/on-chain";
+import { useProvider, useTokenInfo } from "hooks/on-chain";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
