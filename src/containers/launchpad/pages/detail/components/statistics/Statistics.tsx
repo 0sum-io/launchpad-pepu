@@ -5,7 +5,7 @@ import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { TXNS } from "./TXNS";
 import { TopTraders } from "./TopTraders";
 
-export function StatisticsSection({ presale }: { presale: ParsedPresale }) {
+const StatisticsSection = ({ presale }: { presale: ParsedPresale }) => {
   const [tab, setTab] = useState<"TXNS" | "Traders">("TXNS");
 
   return (
@@ -33,7 +33,9 @@ export function StatisticsSection({ presale }: { presale: ParsedPresale }) {
       </Container>
     </div>
   );
-}
+};
+
+export default StatisticsSection;
 
 const Container = styled.div`
   padding: 24px 24px 32px 24px;
