@@ -9,6 +9,7 @@ import {
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { formatEther } from "@ethersproject/units";
+import { ProgressBar } from "components/ProgressBar";
 import { chains } from "constants/chains";
 import {
   useBondingCurveProgress,
@@ -22,8 +23,7 @@ import { formatDecimals, shortenAddress } from "utils/format";
 import { hoverableStyle } from "utils/style";
 /* import { Theme, SwapWidget } from "@uniswap/widgets";
 
-const TOKEN_LIST = 'https://ipfs.io/ipns/tokens.uniswap.org';
-const BONDED = '0x918d6265e061de4aae9f71432155a98f833808c9';
+const TOKEN_LIST = 'https://raw.githubusercontent.com/0sum-io/tokens/refs/heads/main/pepe-unchained.json';
 
 const theme: Theme = {
   primary: '#1F4A05',
@@ -44,7 +44,7 @@ interface Props {
   presale: ParsedPresale;
 }
 
-export function SummarySection({ presale }: Props) {
+const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
@@ -78,6 +78,10 @@ export function SummarySection({ presale }: Props) {
           {formatDecimals(progress.data || 0, 2)}%
         </PercentageBadge>
       </Flex.CenterVertical>
+
+      <Spacing height={4} />
+      <ProgressBar value={progress.data} size={5} />
+
       <Divider
         color="#272727"
         marginVertical={isMobile ? 16 : 24}
@@ -118,7 +122,9 @@ export function SummarySection({ presale }: Props) {
       </Flex.CenterVertical>
     </Container>
   );
-}
+};
+
+export default SummarySection;
 
 const Container = styled.div`
   background-color: #161616;
@@ -137,13 +143,24 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       <Spacing height={24} />
       {/* <SwapWidget 
         tokenList={TOKEN_LIST}
-        defaultInputTokenAddress="NATIVE"
+        defaultInputTokenAddress={`${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}`} 
         defaultInputAmount="1"
-        defaultOutputTokenAddress={BONDED} 
+        defaultOutputTokenAddress={`${data.token}`} 
         theme={theme} 
         provider={useProvider()}
       />
       <Spacing height={24} /> */}
+      <iframe
+        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?inputCurrency=${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}&outputCurrency=${data.token}`}
+        height="660px"
+        width="100%"
+        style={{ 
+          margin: "0 auto",
+          marginBottom: ".5rem",
+          display: "block",
+          borderRadius: "10px"
+        }}
+      />
 
       <Text size="lg" color={colors.white} weight="semibold" style={{ textAlign: "center" }}>
         Or
