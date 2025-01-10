@@ -98,7 +98,7 @@ export function FeaturedSection() {
             <WalletControlLazy left={isMobile ? "0px" : "-100px"} />
 
             <div>
-              <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>
+            <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>
               <a href={data?.id}>
                 <Flex.CenterHorizontal style={{ zIndex: "1" }}>
                   <StyledImage src={data?.data.iconUrl} />
