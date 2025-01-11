@@ -120,8 +120,18 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
         target="_blank"
         rel="noreferrer"
       >
-        <StyledBadge>Trade</StyledBadge>
+        <StyledBadge>Visit DEX</StyledBadge>
       </a>
+      <Spacing height={24} />
+      <iframe
+        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?theme=dark&inputCurrency=${data.paymentToken}&outputCurrency=${data.id}`}
+        scrolling="no"
+        style={{
+          border: "none",
+          width: '100%',
+          height: '700px',
+        }}
+      />
     </Container>
   );
 }
