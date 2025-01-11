@@ -9,6 +9,7 @@ import {
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { formatEther } from "@ethersproject/units";
+import { ProgressBar } from "components/ProgressBar";
 import { chains } from "constants/chains";
 import {
   useBondingCurveProgress,
@@ -25,7 +26,7 @@ interface Props {
   presale: ParsedPresale;
 }
 
-export function SummarySection({ presale }: Props) {
+const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
@@ -59,6 +60,10 @@ export function SummarySection({ presale }: Props) {
           {formatDecimals(progress.data || 0, 2)}%
         </PercentageBadge>
       </Flex.CenterVertical>
+
+      <Spacing height={4} />
+      <ProgressBar value={progress.data} size={5} />
+
       <Divider
         color="#272727"
         marginVertical={isMobile ? 16 : 24}
@@ -99,7 +104,9 @@ export function SummarySection({ presale }: Props) {
       </Flex.CenterVertical>
     </Container>
   );
-}
+};
+
+export default SummarySection;
 
 const Container = styled.div`
   background-color: #161616;
@@ -120,8 +127,18 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
         target="_blank"
         rel="noreferrer"
       >
-        <StyledBadge>Trade</StyledBadge>
+        <StyledBadge>Visit DEX</StyledBadge>
       </a>
+      <Spacing height={24} />
+      <iframe
+        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?theme=dark&inputCurrency=${data.paymentToken}&outputCurrency=${data.id}`}
+        scrolling="no"
+        style={{
+          border: "none",
+          width: '100%',
+          height: '700px',
+        }}
+      />
     </Container>
   );
 }
