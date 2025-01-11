@@ -127,7 +127,6 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
         target="_blank"
         rel="noreferrer"
       >
-        <StyledBadge>Trade</StyledBadge>
         <StyledBadge>Visit DEX</StyledBadge>
       </a>
       <Spacing height={24} />
