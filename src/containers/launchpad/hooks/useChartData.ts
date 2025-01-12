@@ -6,6 +6,8 @@ import {
   Pool15MinuteData,
   PoolDayData,
 } from "../../../../graphql/launchpad/chain";
+import { getV3PairAddress } from "utils/getV3PairAddress";
+import { getV3Candles } from "utils/getV3Candles";
 
 export const useChartData = (presale: ParsedPresale, unit: ChartDataUnit) => {
   const { data, isLoading, refetch } = useQuery<
@@ -14,9 +16,10 @@ export const useChartData = (presale: ParsedPresale, unit: ChartDataUnit) => {
   >({
     queryKey: ["getChartData", unit, presale.pairAddress],
     queryFn: async () => {
-      const data = await LaunchpadQueries[presale.chainId][PATH_BY_UNIT[unit]](
-        presale.pairAddress.toLowerCase()
-      );
+      // if presale ended, then display v3 dex chart
+      const data = presale.isEnd
+        ? await getV3Candles(PATH_BY_UNIT[unit], await getV3PairAddress(presale.paymentToken, presale.id))
+        : await LaunchpadQueries[presale.chainId][PATH_BY_UNIT[unit]](presale.pairAddress.toLowerCase())
       return data.map((i) => {
         const isInvertPrice = addressIsSame(
           i.pool.token1.id,
