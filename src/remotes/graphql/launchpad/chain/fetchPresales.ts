@@ -31,6 +31,7 @@ function parsePresale(data: Presale): ParsedPresale {
 
 export interface ParsedPresale extends Omit<Presale, "data"> {
   chainId: EVMChainId;
+  isEnd?: boolean;
   data: {
     websiteUrl?: string;
     xUrl?: string;
