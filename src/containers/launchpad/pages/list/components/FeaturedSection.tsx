@@ -26,6 +26,8 @@ export function FeaturedSection() {
   const isMobile = useCheckIsMobile();
   const form = useCreatePresaleState();
 
+  // console.log("FeaturedSection", data, presaleList, pools);
+
   useEffect(() => {
     if (!presaleList.data || !pools.data) return;
 

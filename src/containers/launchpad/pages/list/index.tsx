@@ -10,6 +10,10 @@ const SaleCard = dynamic(() => import('./components/SaleCard'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
 });
 
+const MainPageStatistics = dynamic(() => import('./components/statistics/MainStatistics'), {
+  loading: () => <p>Loading...</p>, // Optional fallback while loading
+});
+
 export default function HomePage() {
   const isMobile = useCheckIsMobile();
   const sortedPresales = useSortedPresaleList();
@@ -55,7 +59,6 @@ export default function HomePage() {
       }
     }
   };
-  
 
   return (
     <div>
@@ -101,6 +104,7 @@ export default function HomePage() {
           <Spacing height={isMobile ? 64 : 32} />
 
         </ContentContainer>
+        <MainPageStatistics />
       </PageContainer>
     </div>
   );
