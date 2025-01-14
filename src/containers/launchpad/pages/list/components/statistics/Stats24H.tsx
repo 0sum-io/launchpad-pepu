@@ -11,7 +11,7 @@ import {
   differenceInSeconds,
 } from "date-fns";
 import { useTokenInfo } from "hooks/on-chain";
-import { useCEXPrice } from "hooks/on-chain/useCEXPrice";
+import { fetchQuote } from "hooks/on-chain/useDEXPrice";
 import { useEffect, useMemo, useState } from "react";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { addressIsSame } from "utils/addressIsSame";
@@ -23,6 +23,14 @@ const Stats24H = () => {
   const sortedPresales = useSortedPresaleList();
   let [sortedPresalesTable, setData] = useState(undefined);
   const pools = usePools();
+
+  let [dexPrice, setDexPrice] = useState(0);
+  const newDexPrice = fetchQuote();
+
+  newDexPrice.then((data) => {
+    setDexPrice(parseFloat(data));
+    console.log("dexPrice ----> ", dexPrice);
+  });
 
   console.log("sortedPresales", sortedPresales);
 
@@ -122,7 +130,7 @@ const Stats24H = () => {
           <tr>
             <TableHeader> Token name </TableHeader>
             <TableHeader> Marketcap </TableHeader>
-            <TableHeader> 24h Volume ($WPEPU) </TableHeader>
+            <TableHeader> 24h Volume </TableHeader>
             <TableHeader> Performance </TableHeader>
           </tr>
         </thead>
@@ -148,10 +156,10 @@ const Stats24H = () => {
                       1
                     </TableBody>
                     <TableBody width={23}>
-                      {commaizeNumber(
+                      ${commaizeNumber(
                         formatDecimals(
-                          Math.abs(true ? item.volume : item.volume),
-                          4
+                          Math.abs(true ? item.volume * dexPrice : item.volume * dexPrice),
+                          2
                         )
                       )}
                     </TableBody>
