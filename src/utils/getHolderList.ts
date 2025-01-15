@@ -9,9 +9,6 @@ export async function getHolderList(
         account {
           id
         }
-        token {
-          name
-        }
     }
   }`;
   const poolRes = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
@@ -45,7 +42,6 @@ export async function getHolderList(
       balance: holderBalance,
     });
   }
-  console.log(owners);
   return topHolders;
 }
 
