@@ -51,6 +51,5 @@ async function getBalanceOf(token, owner): Promise<ethers.BigNumber> {
   );
   const erc20 = new ethers.Contract(token, ERC20ABI, provider);
   const balanceOf = await erc20.balanceOf(owner);
-  console.log(balanceOf);
   return balanceOf;
 }
