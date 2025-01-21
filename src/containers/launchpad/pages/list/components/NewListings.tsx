@@ -1,5 +1,114 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import { useSortedPresaleList } from "containers/launchpad/hooks";
+
+const NewListingsTicker = () => {
+  let [listings, setData] = useState([]);
+  const sortedPresales = useSortedPresaleList();
+
+  useEffect(() => {
+    if (!sortedPresales) return;
+
+    // Function to update the data
+    const updateData = async () => {
+      const newListings = await fetchData();
+      let newDataSet = [];
+
+      for (let listing of newListings) {
+        const singleListing = {};
+        // Find the sortedPresales token that matches the swap token
+        const presale = sortedPresales.find((presale) => {
+          if (listing.token0.id === presale.token) {
+            return listing;
+          }
+          if (listing.token1.id === presale.token) {
+            return listing;
+          }
+        });
+
+        singleListing["avatar"] =
+          presale?.data?.iconUrl || process.env.NEXT_PUBLIC_LOGO; // Replace with actual image URL
+        singleListing["name"] = presale?.name;
+
+        newDataSet.push(singleListing);
+      }
+
+      // console.log("New dataset purchases:", newDataSet); // Debugging log
+      setData(newDataSet);
+    };
+
+    // Set up the interval
+    const interval = setInterval(updateData, 5000); // Every 5 seconds
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [sortedPresales]);
+
+  // fetch data from graphql
+  const fetchData = async () => {
+    const query = `
+        query LastSwap {
+          mints(orderBy: timestamp, orderDirection: desc) {
+            token0 {
+              name
+              id
+              volume
+              symbol
+            }
+            token1 {
+              name
+              id
+              volume
+              symbol
+            }
+          }
+        }
+    `;
+
+    const json = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    return json.data.mints;
+  };
+
+  return (
+    <TickerContainer>
+      <p
+        style={{
+          display: "flex",
+          alignItems: "center",
+          fontSize: "22px",
+          fontWeight: "700",
+          minWidth: "210px",
+          height: "32px",
+          paddingLeft: "50px",
+          background: "#2eb335",
+          zIndex: "1",
+          maskImage:
+            "linear-gradient(to left, transparent, black 10%, black 90%, transparent)",
+        }}
+      >
+        {" "}
+        New Listings{" "}
+      </p>
+      <TickerWrapper>
+        {listings.map((purchase, index) => (
+          <TickerItem key={index}>
+            <Avatar src={purchase.avatar} alt={purchase.name} />
+            <span>{purchase.name} has just been listed |</span>
+          </TickerItem>
+        ))}
+      </TickerWrapper>
+    </TickerContainer>
+  );
+};
+
+export default NewListingsTicker;
 
 const TickerContainer = styled.div`
   display: flex;
@@ -44,56 +153,3 @@ const Avatar = styled.img`
   height: 32px;
   border-radius: 50%;
 `;
-
-const NewListingsTicker = () => {
-  const purchases = [
-    {
-      avatar: process.env.NEXT_PUBLIC_LOGO, // Replace with actual image URL
-      amount: "46374 WPEPU",
-      name: "Grinchy",
-    },
-    {
-      avatar: process.env.NEXT_PUBLIC_LOGO, // Replace with actual image URL
-      amount: "938433 WPEPU",
-      name: "MiniCat",
-    },
-    {
-      avatar: process.env.NEXT_PUBLIC_LOGO, // Replace with actual image URL
-      amount: "3837 WPEPU",
-      name: "Grinchy",
-    },
-    {
-      avatar: process.env.NEXT_PUBLIC_LOGO, // Replace with actual image URL
-      amount: "2947333 WPEPU",
-      name: "Grinchy",
-    },
-  ];
-
-  return (
-    <TickerContainer>
-      <p style={{ 
-        display: "flex",
-        alignItems: "center",
-        fontSize: "22px", 
-        fontWeight: "700", 
-        minWidth: "210px", 
-        height: "32px",
-        paddingLeft: "50px", 
-        background: "#2eb335", 
-        zIndex: "1", 
-        maskImage: "linear-gradient(to left, transparent, black 10%, black 90%, transparent)" }}> New Listings </p>
-      <TickerWrapper>
-        {purchases.map((purchase, index) => (
-          <TickerItem key={index}>
-            <Avatar src={purchase.avatar} alt={purchase.name} />
-            <span>
-              {purchase.amount} of {purchase.name} bought |
-            </span>
-          </TickerItem>
-        ))}
-      </TickerWrapper>
-    </TickerContainer>
-  );
-};
-
-export default NewListingsTicker;
