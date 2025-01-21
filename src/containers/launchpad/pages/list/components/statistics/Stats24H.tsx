@@ -10,13 +10,10 @@ import {
   differenceInMinutes,
   differenceInSeconds,
 } from "date-fns";
-import { useTokenInfo } from "hooks/on-chain";
-import { fetchQuote } from "hooks/on-chain/useDEXPrice";
+import { fetchQuote } from "hooks/on-chain/useDexPrice";
 import { useEffect, useMemo, useState } from "react";
-import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { addressIsSame } from "utils/addressIsSame";
-import { checkIsNative, getClearedSymbol } from "utils/checkIsNative";
-import { formatDecimals, shortenAddress } from "utils/format";
+import { formatDecimals} from "utils/format";
 import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
@@ -24,20 +21,15 @@ const Stats24H = () => {
   let [sortedPresalesTable, setData] = useState([]);
   const pools = usePools();
 
-  const dexPrice = 0.00987;
-
-  /* let [dexPrice, setDexPrice] = useState(0);
+  let [dexPrice, setDexPrice] = useState(0);
 
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
-      console.log("Dex price: ", price);
       setDexPrice(parseFloat(price));
     };
     fetchDexPrice();
-  }, []); */
-
-  // console.log("sortedPresales", sortedPresales);
+  }, []);
 
   const sumSwapsByToken = (swaps, tokenInfo) => {
     // Create an object to store the sum for each token
@@ -109,7 +101,6 @@ const Stats24H = () => {
     fetchData(withVolumeInWpepu);
 
     const interval = setInterval(() => {
-      // console.log("fetching data");
       fetchData(withVolumeInWpepu);
     }, 5000);
 
@@ -151,12 +142,8 @@ const Stats24H = () => {
         seenTokenIds.add(swap.token0.id);
       }
     });
-    // json is swap data only
-    // console.log("uniqueSwaps ---> ", uniqueSwaps);
 
     const presales = sumSwapsByToken(uniqueSwaps, withVolumeInWpepu);
-    // console.log("Final Data ---> ", presales);
-
     setData(presales);
   };
 
