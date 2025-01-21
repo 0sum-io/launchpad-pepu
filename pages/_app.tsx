@@ -40,23 +40,23 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
       <RootProvider>
-        <LatestPurchasesTicker />
           <RecoilRoot>
             <QueryClientProvider client={client}>
-              <RootStateProvider>
-                <PortalProvider>
-                  <SnackBarProvider>
-                    <PopupProvider>
-                      <RootContainer>
-                        <Component {...pageProps} />
-                      </RootContainer>
-                    </PopupProvider>
-                  </SnackBarProvider>
-                </PortalProvider>
-              </RootStateProvider>
+              <LatestPurchasesTicker />
+                <RootStateProvider>
+                  <PortalProvider>
+                    <SnackBarProvider>
+                      <PopupProvider>
+                        <RootContainer>
+                          <Component {...pageProps} />
+                        </RootContainer>
+                      </PopupProvider>
+                    </SnackBarProvider>
+                  </PortalProvider>
+                </RootStateProvider>
+              <NewListingsTicker />
             </QueryClientProvider>
           </RecoilRoot>
-        <NewListingsTicker />
       </RootProvider>
     </ColorModeProvider>
   );

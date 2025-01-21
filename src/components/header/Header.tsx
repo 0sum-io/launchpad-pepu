@@ -10,8 +10,9 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <HeaderContainer
-      backgroundColor={isMenuOpen && isMobile ? "#0F0F0F" : "transparent"}
+    <HeaderContainer style={{
+      backgroundColor: (isMenuOpen && isMobile) ? "#0F0F0F" : "transparent"
+    }}
     >
 
       <Flex.CenterVertical>
@@ -92,12 +93,9 @@ export function Header() {
   );
 }
 
-const HeaderContainer = styled(Flex.CenterVertical)<{
-  backgroundColor: string;
-}>`
+const HeaderContainer = styled(Flex.CenterVertical)`
   z-index: 1000;
   margin-top: 10px;
-  background-color: ${({ backgroundColor }) => backgroundColor};
   width: 80%;
   padding: 0px 16px;
   position: relative;

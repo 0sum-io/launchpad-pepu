@@ -21,18 +21,23 @@ import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
   const sortedPresales = useSortedPresaleList();
-  let [sortedPresalesTable, setData] = useState(undefined);
+  let [sortedPresalesTable, setData] = useState([]);
   const pools = usePools();
 
-  let [dexPrice, setDexPrice] = useState(0);
-  const newDexPrice = fetchQuote();
+  const dexPrice = 0.00987;
 
-  newDexPrice.then((data) => {
-    setDexPrice(parseFloat(data));
-    console.log("dexPrice ----> ", dexPrice);
-  });
+  /* let [dexPrice, setDexPrice] = useState(0);
 
-  console.log("sortedPresales", sortedPresales);
+  useEffect(() => {
+    const fetchDexPrice = async () => {
+      const price = await fetchQuote();
+      console.log("Dex price: ", price);
+      setDexPrice(parseFloat(price));
+    };
+    fetchDexPrice();
+  }, []); */
+
+  // console.log("sortedPresales", sortedPresales);
 
   const sumSwapsByToken = (swaps, tokenInfo) => {
     // Create an object to store the sum for each token
@@ -52,49 +57,67 @@ const Stats24H = () => {
       // Initialize the sum for the token if not present
       if (!tokenSums[tokenId]) {
         const tokenDetails = tokenInfo.find((info) => info.token === tokenId) || {};
+
+        // console.log("Token swap data: ", swap);
+        
+        let tokenAmount0 = parseFloat(swap.amount0);
+        let tokenAmount1 = parseFloat(swap.amount1);
+        
+        tokenAmount0 = tokenAmount0 < 0 ? (tokenAmount0 * -1) : tokenAmount0;
+        tokenAmount1 = tokenAmount1 < 0 ? (tokenAmount1 * -1) : tokenAmount1;
+    
+        // console.log("Price in USD: ", (tokenAmount1 / tokenAmount0) * dexPrice);
+
         tokenSums[tokenId] = {
           id: tokenId,
           name: swap.token0.name,
           symbol: swap.token0.symbol,
-          volume: 0,
+          volume: volume,
+          token0Amount: tokenAmount0,
+          token1Amount: tokenAmount1,
+          price: tokenAmount1 / tokenAmount0,
+          priceInUSD: (tokenAmount1 / tokenAmount0) * dexPrice,
+          marketCap: ((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000,
+          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 150) * 100,
+          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 150),
           tokenInfo: tokenDetails || {}, // Add the corresponding token info
         };
       }
   
       // Add the current swap's volume to the total volume for the token
-      tokenSums[tokenId].volume += volume;
+      // tokenSums[tokenId].volume += volume;
     });
 
     // Convert the sums object into an array of results
     // Return sorted results by volume
-    return Object.values(tokenSums).sort((a: any, b: any) => b.volume - a.volume);
+    return Object.values(tokenSums).sort((a: any, b: any) => (b.volume * b.priceInUSD) - (a.volume * a.priceInUSD));
   }
 
   useEffect(() => {
-    if (!sortedPresales || !pools.data) return;
+    if (!sortedPresales || !pools.data || dexPrice === 0) return;
 
     // derive market cap from pools and presales
-    const withMC = sortedPresales.map((i) => {
+    const withVolumeInWpepu = sortedPresales.map((i) => {
       const data = pools.data.find((v) => addressIsSame(v.id, i.pairAddress));
-      const mc = addressIsSame(data.token0.id, i.token)
+      const volumeInWpepu = addressIsSame(data.token0.id, i.token)
         ? data.volumeToken1
         : data.volumeToken0;
-      return { ...i, mc };
+      return { ...i, volumeInWpepu };
     });
-    console.log("withMC", withMC);
+    // console.log("withVolumeInWpepu", withVolumeInWpepu);
     // fetch last swap data
-    fetchData(withMC);
+    fetchData(withVolumeInWpepu);
 
     const interval = setInterval(() => {
-      console.log("fetching data");
-      fetchData(withMC);
+      // console.log("fetching data");
+      fetchData(withVolumeInWpepu);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [sortedPresales, pools.data]);
+  }, [sortedPresales, pools.data, dexPrice]);
 
   // fetch data from graphql
-  const fetchData = async (withMC: any[]) => {
+  const fetchData = async (withVolumeInWpepu: any[]) => {
     const query = `
         query LastSwap {
           swaps(orderBy: timestamp, orderDirection: desc) {
@@ -104,6 +127,8 @@ const Stats24H = () => {
               volume
               symbol
             }
+            amount0
+            amount1
           }
         }
     `;
@@ -116,11 +141,23 @@ const Stats24H = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    const presale = sumSwapsByToken(json.data.swaps, sortedPresales);
-    setData(presale);
+    // Deduplicate swaps by token0 ID
+    const uniqueSwaps = [];
+    const seenTokenIds = new Set();
 
+    json.data.swaps.forEach((swap) => {
+      if (!seenTokenIds.has(swap.token0.id)) {
+        uniqueSwaps.push(swap);
+        seenTokenIds.add(swap.token0.id);
+      }
+    });
     // json is swap data only
-    // console.log("json", json);
+    // console.log("uniqueSwaps ---> ", uniqueSwaps);
+
+    const presales = sumSwapsByToken(uniqueSwaps, withVolumeInWpepu);
+    // console.log("Final Data ---> ", presales);
+
+    setData(presales);
   };
 
   return (
@@ -149,22 +186,32 @@ const Stats24H = () => {
               return (
                 <TableBodyRow key={item.tokenInfo.id} onClick={() => window.location.href=`/${item.tokenInfo.token}`}>
                     <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                      <StyledImage src={item?.tokenInfo.data.iconUrl} />
+                      <StyledImage src={item?.tokenInfo?.data?.iconUrl} />
                       <p style={{ paddingLeft: "10px" }}>{item.tokenInfo.name}</p>
-                    </TableBody>
-                    <TableBody width={23}>
-                      1
                     </TableBody>
                     <TableBody width={23}>
                       ${commaizeNumber(
                         formatDecimals(
-                          Math.abs(true ? item.volume * dexPrice : item.volume * dexPrice),
+                          Math.abs(item.marketCap),
                           2
                         )
                       )}
                     </TableBody>
                     <TableBody width={23}>
-                      1
+                      ${commaizeNumber(
+                        formatDecimals(
+                          Math.abs(item.volume * item.priceInUSD),
+                          2
+                        )
+                      )}
+                    </TableBody>
+                    <TableBody width={23}>
+                      {commaizeNumber(
+                        formatDecimals(
+                          Math.abs(item.xChange),
+                          2
+                        )
+                      )}x
                     </TableBody>
                     <TableBody width={8}>
                       <a

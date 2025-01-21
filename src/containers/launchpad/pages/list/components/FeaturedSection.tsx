@@ -26,17 +26,23 @@ export function FeaturedSection() {
   const isMobile = useCheckIsMobile();
   const form = useCreatePresaleState();
 
-  // console.log("FeaturedSection", data, presaleList, pools);
+  const dexPrice = 0.00987;
 
-  let [dexPrice, setDexPrice] = useState(0);
-  const newDexPrice = fetchQuote();
-
-  newDexPrice.then((data) => {
-    setDexPrice(parseFloat(data));
-  });
+  /* let [dexPrice, setDexPrice] = useState(0);
 
   useEffect(() => {
-    if (!presaleList.data || !pools.data) return;
+    const fetchDexPrice = async () => {
+      const price = await fetchQuote();
+      console.log("Dex price: ", price);
+      setDexPrice(parseFloat(price));
+    };
+    fetchDexPrice();
+  }, []); */
+
+  // console.log("FeaturedSection", data, presaleList, pools);
+
+  useEffect(() => {
+    if (!presaleList.data || !pools.data || dexPrice === 0) return;
 
     // derive market cap from pools and presales
     const withVolumeInWpepu = presaleList.data.map((i) => {
@@ -81,13 +87,12 @@ export function FeaturedSection() {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-
     const presale = withVolumeInWpepu.find(
       (i) => i.token === json.data.swaps[0].token0.id
     );
 
-    console.log("json ----> ", json);
-    console.log("presale ----> ", presale);
+    /* console.log("json ----> ", json);
+    console.log("presale ----> ", presale); */
 
     let tokenAmount0 = parseFloat(json.data.swaps[0].amount0);
     let tokenAmount1 = parseFloat(json.data.swaps[0].amount1);
@@ -121,7 +126,7 @@ export function FeaturedSection() {
       },
     });
 
-    console.log("data ----> ", data);
+    // console.log("Featured data ----> ", data);
   };
 
   return (
@@ -282,33 +287,33 @@ const LiveNowContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px; /* Space between dot and text */
+  gap: 8px;
   font-size: 16px;
   font-weight: bold;
-  color: #2eb335; /* Bright green color */
+  color: #2eb335;
   background-color: transparent;
 
   .live-dot {
     width: 15px;
     height: 15px;
-    background-color: #00ff00; /* Bright green dot */
-    border-radius: 50%; /* Make it a circle */
-    box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Glowing effect */
+    background-color: #00ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     animation: pulse 1.5s infinite;
   }
 
   @keyframes pulse {
     0% {
       transform: scale(1);
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Subtle glow */
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     }
     50% {
-      transform: scale(1.5); /* Scale up the dot */
-      box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Bright glowing background */
+      transform: scale(1.5);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 1);
     }
     100% {
       transform: scale(1);
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Return to subtle glow */
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     }
   }
 `;
