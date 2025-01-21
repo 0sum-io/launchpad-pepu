@@ -10,6 +10,10 @@ const SaleCard = dynamic(() => import('./components/SaleCard'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
 });
 
+const MainPageStatistics = dynamic(() => import('./components/statistics/MainStatistics'), {
+  loading: () => <p>Loading...</p>, // Optional fallback while loading
+});
+
 export default function HomePage() {
   const isMobile = useCheckIsMobile();
   const sortedPresales = useSortedPresaleList();
@@ -55,7 +59,6 @@ export default function HomePage() {
       }
     }
   };
-  
 
   return (
     <div>
@@ -101,6 +104,7 @@ export default function HomePage() {
           <Spacing height={isMobile ? 64 : 32} />
 
         </ContentContainer>
+        <MainPageStatistics />
       </PageContainer>
     </div>
   );
@@ -136,16 +140,16 @@ const ContentSubContainer = styled.div`
 
 const GridListContainer = styled.div`
   display: grid;
-  grid-template-rows: repeat(2, min-content); /* Two rows with automatic height */
-  grid-auto-flow: column; /* Flow items horizontally */
-  grid-auto-columns: minmax(300px, 1fr); /* Each column has a minimum width */
-  grid-gap: 16px; /* Space between items */
-  overflow-x: auto; /* Enable horizontal scrolling */
+  grid-template-rows: repeat(2, min-content);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(300px, 1fr);
+  grid-gap: 16px;
+  overflow-x: auto;
   scroll-behavior: smooth;
-  white-space: nowrap; /* Prevent wrapping */
+  white-space: nowrap;
 
   &::-webkit-scrollbar {
-    display: none; /* Hide the scrollbar */
+    display: none;
   }
 
   ${inDesktop(`
