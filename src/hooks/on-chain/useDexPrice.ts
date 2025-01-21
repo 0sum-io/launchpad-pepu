@@ -10,6 +10,8 @@ export async function fetchQuote(): Promise<string> {
           { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
         ]
       }
+      orderBy: createdAtBlockNumber
+      orderDirection: asc
     ) {
       token0Price
       token1Price
