@@ -41,7 +41,6 @@ export function FeaturedSection() {
     fetchData(withMC);
 
     const interval = setInterval(() => {
-      console.log("fetching data");
       fetchData(withMC);
     }, 5000);
 

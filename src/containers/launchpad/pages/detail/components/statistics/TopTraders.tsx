@@ -2,13 +2,22 @@ import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { formatEther } from "@ethersproject/units";
 import { chains } from "constants/chains";
-import { useHolderList } from "containers/launchpad/hooks";
+import { useEffect, useState } from "react";
 import { orderBy } from "lodash";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { formatDecimals, shortenAddress } from "utils/format";
+import { getHolderList } from "utils/getHolderList";
 
 export function TopTraders({ data }: { data?: ParsedPresale }) {
-  const holderList = useHolderList(data);
+  const [holderList, setHolderList] = useState([
+    { account: "0x0", balance: "0" },
+  ]);
+
+  useEffect(() => {
+    getHolderList(data.id).then((res) => {
+      setHolderList(res);
+    });
+  }, []);
 
   return (
     <table style={{ width: "100%", minWidth: "748px", borderSpacing: 0 }}>
@@ -16,10 +25,6 @@ export function TopTraders({ data }: { data?: ParsedPresale }) {
         <tr>
           <TableHeader>Rank</TableHeader>
           <TableHeader>Account</TableHeader>
-          {/* <TableHeader>Bought</TableHeader>
-          <TableHeader>Sold</TableHeader>
-          <TableHeader>PNL</TableHeader>
-          <TableHeader>Unrealized</TableHeader> */}
           <TableHeader>Balance</TableHeader>
           <TableHeader>EXP</TableHeader>
         </tr>
@@ -35,10 +40,6 @@ export function TopTraders({ data }: { data?: ParsedPresale }) {
             <TableBodyRow key={`${item.account}${idx}`}>
               <TableBody>#{idx + 1}</TableBody>
               <TableBody>{shortenAddress(item.account, 4)}</TableBody>
-              {/* <TableBody>10.0652</TableBody>
-            <TableBody>155.3421</TableBody>
-            <TableBody>$0.000054</TableBody>
-            <TableBody>$0.0000054</TableBody> */}
               <TableBody>
                 {commaizeNumber(
                   formatDecimals(Math.abs(Number(formatEther(item.balance))), 3)
@@ -52,7 +53,11 @@ export function TopTraders({ data }: { data?: ParsedPresale }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <img src="/images/ic_expand_window.svg" alt="expand"  width={14} />
+                  <img
+                    src="/images/ic_expand_window.svg"
+                    alt="expand"
+                    width={14}
+                  />
                 </a>
               </TableBody>
             </TableBodyRow>
