@@ -10,8 +10,8 @@ import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCheckIsMobile } from "@boxfoxs/bds-web";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
-// import { WalletControl } from "components/header/WalletControl";
 import dynamic from 'next/dynamic';
+import { fetchQuote } from "hooks/on-chain/useDexPrice";
 
 const WalletControlLazy = dynamic(() => import('../../../../../components/header/WalletControl'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
@@ -26,29 +26,40 @@ export function FeaturedSection() {
   const isMobile = useCheckIsMobile();
   const form = useCreatePresaleState();
 
+  const [dexPrice, setDexPrice] = useState(0);
+
   useEffect(() => {
-    if (!presaleList.data || !pools.data) return;
+    const fetchDexPrice = async () => {
+      const price = await fetchQuote();
+      console.log("Dex price: ", price);
+      setDexPrice(parseFloat(price));
+    };
+    fetchDexPrice();
+  }, []);
+
+  useEffect(() => {
+    if (!presaleList.data || !pools.data || dexPrice === 0) return;
 
     // derive market cap from pools and presales
-    const withMC = presaleList.data.map((i) => {
+    const withVolumeInWpepu = presaleList.data.map((i) => {
       const data = pools.data.find((v) => addressIsSame(v.id, i.pairAddress));
-      const mc = addressIsSame(data.token0.id, i.token)
+      const volumeInWpepu = addressIsSame(data.token0.id, i.token)
         ? data.volumeToken1
         : data.volumeToken0;
-      return { ...i, mc };
+      return { ...i, volumeInWpepu };
     });
     // fetch last swap data
-    fetchData(withMC);
+    fetchData(withVolumeInWpepu);
 
     const interval = setInterval(() => {
-      fetchData(withMC);
+      fetchData(withVolumeInWpepu);
     }, 5000);
 
     return () => clearInterval(interval);
   }, [presaleList.data, pools.data]);
 
   // fetch data from graphql
-  const fetchData = async (withMC) => {
+  const fetchData = async (withVolumeInWpepu: any[]) => {
     const query = `
         query LastSwap {
           swaps(first: 1, orderBy: timestamp, orderDirection: desc) {
@@ -58,6 +69,8 @@ export function FeaturedSection() {
               volume
               symbol
             }
+            amount0
+            amount1
           }
         }
     `;
@@ -70,15 +83,39 @@ export function FeaturedSection() {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    const presale = withMC.find(
+    const presale = withVolumeInWpepu.find(
       (i) => i.token === json.data.swaps[0].token0.id
     );
+
+    /* console.log("json ----> ", json);
+    console.log("presale ----> ", presale); */
+
+    let tokenAmount0 = parseFloat(json.data.swaps[0].amount0);
+    let tokenAmount1 = parseFloat(json.data.swaps[0].amount1);
+
+    // Make sure that token amount is not negative
+    tokenAmount0 = tokenAmount0 < 0 ? (tokenAmount0 * -1) : tokenAmount0;
+    tokenAmount1 = tokenAmount1 < 0 ? (tokenAmount1 * -1) : tokenAmount1;
+
+    // Calculate the price of token0 in WPEPU/token0
+    const price = tokenAmount1 / tokenAmount0;
+    // Calculate the price in USD
+    const priceInUSD = price * dexPrice;
+    // Calculate current market cap (supply is 1B)
+    const marketCap = 1000000000 * priceInUSD;
+    // Calculate percentage change (current market cap / initial market cap * 100)
+    const percentageChange = ((1000000000 * priceInUSD) / 150) * 100;
 
     setData({
       id: json.data.swaps[0].token0.id,
       name: json.data.swaps[0].token0.name,
       symbol: json.data.swaps[0].token0.symbol,
-      marketCap: presale.mc,
+      marketCap: marketCap,
+      initial_wpepu_price: 0.00001,
+      initial_market_cap: 150,
+      priceInWpepu: price,
+      priceInUSD: priceInUSD,
+      percentageChange: percentageChange,
       data: {
         iconUrl: presale.data.iconUrl,
         description: presale.data.description,
@@ -96,7 +133,7 @@ export function FeaturedSection() {
             
             <WalletControlLazy left={isMobile ? "0px" : "-100px"} />
 
-            <div>
+            <div style={{ width: "50%" }}>
             <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>
               <a href={data?.id}>
                 <Flex.CenterHorizontal style={{ zIndex: "1" }}>
@@ -111,17 +148,21 @@ export function FeaturedSection() {
                     <Spacing height={12} />
 
                     <SubContainer>
-                      {/* <Amount>
-                        {`${commaizeNumber(Number(formatDecimals(data.marketCap, 6)))}`}
-                        {` ${process.env.NEXT_PUBLIC_CHAIN_SYMBOL}`}
-                      </Amount> */}
                       <Amount>
-                        $1,837,344.22
+                        ${`${commaizeNumber(
+                          formatDecimals(data.marketCap, 2)
+                          )
+                        }`}
                       </Amount>
                       <Content style={{ paddingLeft: '10px', color: '#FFF' }}>MARKET CAP</Content>
                     </SubContainer>
 
-                    <Content style={{ color: '#2eb335', fontWeight: '700', height: '30px' }}>+$866,308.32 (2,801.22%)</Content>
+                    <Content style={{ color: '#2eb335', fontWeight: '700', height: '30px' }}>
+                      +{`${commaizeNumber(
+                        formatDecimals(data.percentageChange, 2)
+                        )
+                      }`}%
+                    </Content>
                     <LiveNowContainer>
                       <div className="live-dot"></div>
                       <span style={{ paddingTop: '2px' }}>LIVE NOW</span>
@@ -240,33 +281,33 @@ const LiveNowContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px; /* Space between dot and text */
+  gap: 8px;
   font-size: 16px;
   font-weight: bold;
-  color: #2eb335; /* Bright green color */
+  color: #2eb335;
   background-color: transparent;
 
   .live-dot {
     width: 15px;
     height: 15px;
-    background-color: #00ff00; /* Bright green dot */
-    border-radius: 50%; /* Make it a circle */
-    box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Glowing effect */
+    background-color: #00ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     animation: pulse 1.5s infinite;
   }
 
   @keyframes pulse {
     0% {
       transform: scale(1);
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Subtle glow */
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     }
     50% {
-      transform: scale(1.5); /* Scale up the dot */
-      box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Bright glowing background */
+      transform: scale(1.5);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 1);
     }
     100% {
       transform: scale(1);
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8); /* Return to subtle glow */
+      box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
     }
   }
 `;
