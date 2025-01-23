@@ -4,9 +4,10 @@ import { useState } from "react";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { TXNS } from "./TXNS";
 import { TopTraders } from "./TopTraders";
+import { Comments } from "./Comments";
 
 const StatisticsSection = ({ presale }: { presale: ParsedPresale }) => {
-  const [tab, setTab] = useState<"TXNS" | "Traders">("TXNS");
+  const [tab, setTab] = useState<"COMMENTS" | "TXNS" | "Traders">("COMMENTS");
 
   return (
     <div>
@@ -16,6 +17,9 @@ const StatisticsSection = ({ presale }: { presale: ParsedPresale }) => {
       <Spacing height={20} />
       <Container className="StatisticsTable">
         <Flex.CenterVertical>
+          <TabItem active={tab === "COMMENTS"} onClick={() => setTab("COMMENTS")}>
+            COMMENTS
+          </TabItem>
           <TabItem active={tab === "TXNS"} onClick={() => setTab("TXNS")}>
             TXNS
           </TabItem>
@@ -24,11 +28,9 @@ const StatisticsSection = ({ presale }: { presale: ParsedPresale }) => {
           </TabItem>
         </Flex.CenterVertical>
         <TableContainer>
-          {tab === "TXNS" ? (
-            <TXNS data={presale} />
-          ) : (
-            <TopTraders data={presale} />
-          )}
+          {tab === "COMMENTS" && <Comments data={presale} />}
+          {tab === "TXNS" && <TXNS data={presale} />}
+          {tab === "Traders" && <TopTraders data={presale} />}
         </TableContainer>
       </Container>
     </div>
