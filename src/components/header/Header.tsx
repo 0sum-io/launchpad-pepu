@@ -11,14 +11,12 @@ export function Header() {
 
   return (
     <HeaderContainer
-      backgroundColor={isMenuOpen && isMobile ? "#0F0F0F" : "transparent"}
+      backgroundcolor={isMenuOpen && isMobile ? "#0F0F0F" : "transparent"}
     >
 
-      <Flex.CenterVertical>
-        <Logo />
-        <Title> Pepe’s Pump Pad </Title>
-        <Spacing width={40} />
-      </Flex.CenterVertical>
+      <Logo />
+      <Title> Pepe’s Pump Pad </Title>
+      <Spacing width={40} />
 
       <NavListContainer style={{ marginLeft: "auto" }}>
         <Link href="/">
@@ -93,11 +91,11 @@ export function Header() {
 }
 
 const HeaderContainer = styled(Flex.CenterVertical)<{
-  backgroundColor: string;
+  backgroundcolor: string;
 }>`
   z-index: 1000;
   margin-top: 10px;
-  background-color: ${({ backgroundColor }) => backgroundColor};
+  background-color: ${({ backgroundcolor }) => backgroundcolor};
   width: 80%;
   padding: 0px 16px;
   position: relative;
@@ -112,7 +110,7 @@ const HeaderContainer = styled(Flex.CenterVertical)<{
 
 const Title = styled.h1`
   padding-left: 10px;
-  width: 100%;
+  width: auto;
   position: relative;
   color: #2eb335;
   font-weight: 700;

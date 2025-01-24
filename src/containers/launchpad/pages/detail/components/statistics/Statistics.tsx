@@ -15,7 +15,7 @@ const StatisticsSection = ({ presale }: { presale: ParsedPresale }) => {
         <Spacing width={8} />
       </Flex.CenterVertical>
       <Spacing height={20} />
-      <Container className="StatisticsTable">
+      <Container>
         <Flex.CenterVertical>
           <TabItem active={tab === "COMMENTS"} onClick={() => setTab("COMMENTS")}>
             COMMENTS

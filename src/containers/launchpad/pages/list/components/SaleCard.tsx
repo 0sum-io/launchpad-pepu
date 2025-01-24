@@ -23,7 +23,7 @@ const SaleCard = ({ data }: { data: ParsedPresale }) => {
   const paymentToken = useTokenInfo(data.chainId, data.paymentToken);
 
   return (
-    <Container className="SaleCard">
+    <Container>
       <Flex.CenterHorizontal>
         <StyledImage src={data.data.iconUrl} />
         <Spacing width={isMobile ? 16 : 20} />
@@ -31,11 +31,7 @@ const SaleCard = ({ data }: { data: ParsedPresale }) => {
         <div style={{ flex: 1 }}>
           <Spacing height={6} />
 
-          <Flex.CenterVertical>
-            <Title>{data.name}</Title>
-            {/* <Spacing flex={1} />
-            <ChainIcon src={chains[data.chainId].icon} /> */}
-          </Flex.CenterVertical>
+          <Title>{data.name}</Title>
 
           <Spacing height={8} />
           {data.data.description && <Content>{data.data.description}</Content>}
@@ -48,7 +44,7 @@ const SaleCard = ({ data }: { data: ParsedPresale }) => {
               {getClearedSymbol(paymentToken.data?.symbol || "-")}
             </Amount>
 
-            <PercentageBadge full={data.saleAmount === data.presaleAmount}>
+            <PercentageBadge>
               {formatDecimals(progress.data || 0, 2)}%
             </PercentageBadge>
             <Spacing height={4} />
@@ -91,7 +87,7 @@ const StyledImage = styled.img`
 
 const Title = styled.h3`
   color: #fff;
-  text-align: center;
+  text-align: left;
   font-size: 15px;
   font-style: normal;
   line-height: 20px; /* 141.176% */
