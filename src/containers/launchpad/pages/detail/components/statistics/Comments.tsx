@@ -62,6 +62,7 @@ export function Comments({ data }: { data: ParsedPresale }) {
 
         if (!error) {
           insertData['created_at'] = new Date();
+          insertData['replies'] = [];
           if (!replyTo) {
             setComments([insertData, ...commentsList]);
           }
