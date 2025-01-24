@@ -1,51 +1,155 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { hoverableStyle } from "utils/style";
 import { selectImageFile } from "utils/selectImageFile";
 import { colors } from "@boxfoxs/bds-common";
 import { useCreatePresaleState } from "containers/launchpad/pages/create/hooks/useCreateStore";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
+import { createClient } from '@supabase/supabase-js'
+import { useAddress } from "hooks/on-chain";
+import { uploadImage } from "remotes/uploadImage";
+import { shortenAddress } from "utils/format";
 
 export function Comments({ data }: { data: ParsedPresale }) {
+  // Creating Supabase Client
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
+  const address = useAddress();
+
   const form = useCreatePresaleState();
   const [icon, setIcon] =
     React.useState<Awaited<ReturnType<typeof selectImageFile>>>();
 
-  const [commentsList] = useState([
-    {
-      commentator: "C54G...84Bf",
-      timestamp: "5:17:05 PM",
-      comment: "Random comment here...",
-      comment_image_url: "",
-      likes: 3,
-      replies: [],
-    },
-  ]);
+  const [commentsList, setComments] = useState([]);
 
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [imageFile, setImageFile] = useState(null);
+  const [replyTo, setReplyTo] = useState(null);
 
-  const handlePostReply = () => {
+  const handlePostReply = async () => {
     if (newComment.trim()) {
-      // Logic for posting the reply (e.g., update state or call an API)
-      console.log("Comment:", newComment);
-      console.log("Image File:", imageFile);
-      setDialogOpen(false);
-      setNewComment("");
-      setImageFile(null);
+      /* console.log("Posting form data: ", form);
+      console.log("token_address - Presale Token:", data.token.toLocaleLowerCase());
+      console.log("user_id - User Address:", address.toLocaleLowerCase());
+      console.log("content - Comment:", newComment);
+      console.log("image_url - Image File:", icon); */
+
+      // Storing image icon url
+      let iconUrl = null;
+      let tokenAddress = data.token.toLocaleLowerCase();
+
+      if (icon) {
+        iconUrl = await uploadImage(icon.file);
+      }
+
+      // Inserting data into the comments table
+      const insertData = async () => {
+        const insertData = {
+          token_address: tokenAddress,
+          user_id: address.toLocaleLowerCase(),
+          content: newComment
+        }
+
+        if (iconUrl) {
+          insertData['image_url'] = iconUrl;
+        }
+        if (replyTo) {
+          insertData['parent_id'] = replyTo;
+        }
+
+        const { data, error } = await supabase
+          .from('comments')
+          .insert([insertData])
+
+        if (!error) {
+          insertData['created_at'] = new Date();
+          insertData['replies'] = [];
+          if (!replyTo) {
+            setComments([insertData, ...commentsList]);
+          }
+        }
+
+        setDialogOpen(false);
+        setReplyTo(null);
+        setNewComment("");
+        setIcon(null);
+      }
+
+      insertData();
     }
   };
+
+  const setReplyToAddress = (comment_id: Number) => {
+    setReplyTo(comment_id);
+  };
+
+  useEffect(() => {
+    const tokenAddress = data.token.toLocaleLowerCase();
+  
+    const fetchComments = async () => {
+      const { data: fetchedData, error } = await supabase
+        .from("comments")
+        .select()
+        .eq("token_address", tokenAddress)
+        .order("created_at", { ascending: false });
+  
+      if (error) {
+        console.error("Error fetching comments:", error);
+        return;
+      }
+  
+      // Create a map of all comments for easy access
+      const commentsMap = {};
+      fetchedData.forEach((item) => {
+        commentsMap[item.id] = {
+          id: item.id,
+          user_id: item.user_id,
+          created_at: item.created_at,
+          content: item.content,
+          image_url: item.image_url || "",
+          likes: 0,
+          replies: [],
+        };
+      });
+  
+      // Create the nested structure
+      const structuredComments = [];
+      fetchedData.forEach((item) => {
+        if (item.parent_id) {
+          // If it's a reply, find its parent and attach it
+          if (commentsMap[item.parent_id]) {
+            commentsMap[item.parent_id].replies.push(commentsMap[item.id]);
+          }
+        } else {
+          // If it's a top-level comment, add it to the structuredComments array
+          structuredComments.push(commentsMap[item.id]);
+        }
+      });
+
+      setComments(structuredComments);
+    };
+  
+    fetchComments();
+  }, []);
+  
 
   return (
     <Container>
       <Header>
-        <PostReplyButton onClick={() => setDialogOpen(true)}>Post a Reply</PostReplyButton>
+        <PostReplyButton
+          onClick={() => setDialogOpen(true)}
+          disabled={address === undefined}
+        >
+          Post a Reply
+        </PostReplyButton>
         <SortSelect>
           <option>sort: time (asc)</option>
           <option>sort: time (desc)</option>
         </SortSelect>
       </Header>
+
+      {commentsList.length === 0 && (
+        <p style={{ textAlign: "center", margin: "20px 0" }}>Write first comment</p>
+      )}
 
       <CommentsList>
         {commentsList.map((comment, index) => (
@@ -53,12 +157,73 @@ export function Comments({ data }: { data: ParsedPresale }) {
             <CommentHeader>
               <Commentator>
                 <Avatar src="/images/comment_avatar.svg" alt="avatar" />
-                  {comment.commentator}
-                <Timestamp>{comment.timestamp}</Timestamp>
+                  ${shortenAddress(comment.user_id)}
+                <Timestamp>
+                  {new Date(comment.created_at).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </Timestamp>
               </Commentator>
-              <ReplyButton>Reply</ReplyButton>
+              <ReplyButton onClick={() => {
+                  setDialogOpen(true);
+                  setReplyToAddress(comment.id);
+                }}
+                disabled={address === undefined}
+              > Reply
+              </ReplyButton>
             </CommentHeader>
-            <CommentText>{comment.comment}</CommentText>
+            { comment.image_url &&
+              <img
+                src={comment.image_url}
+                alt={comment.image_url}
+                style={{ marginTop: "10px", maxWidth: "-webkit-fill-available" }}
+              />
+            }
+            <CommentText>{comment.content}</CommentText>
+
+              <CommentsList>
+                {comment.replies.map((comment, index) => (
+                  <Comment key={index} style={{ background: "#080808" }}>
+                    <CommentHeader>
+                      <Commentator>
+                        <Avatar src="/images/comment_avatar.svg" alt="avatar" />
+                          ${shortenAddress(comment.user_id)}
+                        <Timestamp>
+                          {new Date(comment.created_at).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </Timestamp>
+                      </Commentator>
+                      <ReplyButton onClick={() => {
+                          setDialogOpen(true);
+                          setReplyToAddress(comment.id);
+                        }}
+                        disabled={address === undefined}
+                      > Reply
+                      </ReplyButton>
+                    </CommentHeader>
+                    { comment.image_url &&
+                      <img
+                        src={comment.image_url}
+                        alt={comment.image_url}
+                        style={{ marginTop: "10px" }}
+                      />
+                    }
+                    <CommentText>{comment.content}</CommentText>
+                  </Comment>
+                ))}
+              </CommentsList>
+
           </Comment>
         ))}
       </CommentsList>
@@ -67,6 +232,7 @@ export function Comments({ data }: { data: ParsedPresale }) {
         <DialogOverlay>
           <Dialog>
             <CloseButton onClick={() => {
+              setReplyToAddress(null);
               setDialogOpen(false);
               setIcon(null);
             }}>&times;</CloseButton>
@@ -88,7 +254,9 @@ export function Comments({ data }: { data: ParsedPresale }) {
                 <FakeStyledButton> Select File </FakeStyledButton>
               </UploadButton>
             </FileUploadContainer>
-            <PostReplyDialogButton onClick={handlePostReply}>Post a Reply</PostReplyDialogButton>
+            <PostReplyDialogButton onClick={handlePostReply}>
+              Post a Reply { replyTo && <span style={{ marginLeft: "5px" }}> to Comment </span> }
+            </PostReplyDialogButton>
           </Dialog>
         </DialogOverlay>
       )}
@@ -126,10 +294,14 @@ const PostReplyButton = styled.button`
   cursor: pointer;
   width: 170px;
   height: 32px;
-  margin-top: 20px;
 
   &:hover {
     background-color: #00b254;
+  }
+
+  &:disabled {
+    background-color: #3B3B3B;
+    cursor: not-allowed;
   }
 `;
 
@@ -195,6 +367,11 @@ const ReplyButton = styled.button`
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:disabled {
+    color: #3B3B3B;
+    cursor: not-allowed;
   }
 `;
 
