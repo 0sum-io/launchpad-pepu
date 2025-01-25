@@ -62,14 +62,6 @@ export default function HomePage() {
 
   return (
     <div>
-      {!isMobile && (
-        <div>
-          {/* <StyledBackground src="/images/img_swap_bg.png" />
-          <CloudImage1 src="/images/img_cloud.png" />
-          <CloudImage2 src="/images/img_cloud.png" />
-          <StarImage src="/images/img_star_2.svg" /> */}
-        </div>
-      )}
       <PageContainer>
         <ContentContainer>
 

@@ -33,7 +33,7 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const paymentToken = useTokenInfo(presale.chainId, presale.paymentToken);
 
   return (
-    <Container className="SummarySection">
+    <Container>
       <Flex.CenterVertical>
         <div>
           <Text
@@ -54,7 +54,6 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
         </div>
         <Spacing flex={1} />
         <PercentageBadge
-          full={true}
           style={{ fontSize: "16px", padding: "6px 7px" }}
         >
           {formatDecimals(progress.data || 0, 2)}%

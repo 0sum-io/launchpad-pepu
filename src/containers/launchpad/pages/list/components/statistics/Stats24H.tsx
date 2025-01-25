@@ -161,8 +161,9 @@ const Stats24H = () => {
         </thead>
         <tbody>
           {!sortedPresalesTable?.length ? (
-            <Spacing height={56} />
-          ) : (
+            <TableBodyRow style={{ height: "56px"}} />
+          ) : 
+          (
             sortedPresalesTable?.map((item) => {
               /* const amount0IsNative = checkIsNative(
                 list.chainId,

@@ -69,7 +69,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
   const presaleContract = usePresaleContract(presale.id);
 
   return (
-    <Container className="TradeCard">
+    <Container>
       <Flex.CenterVertical>
         <TabItem active={isBuy} onClick={() => setCurrentTab("buy")}>
           Buy

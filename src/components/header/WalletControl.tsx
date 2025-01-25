@@ -68,7 +68,6 @@ export function WalletControl({ left = "-100px" }: { left?: string }) {
           <StyledParagraph>Connect your wallet to see your holdings</StyledParagraph>
         )}
         <ConnectButton
-          className="WalletControl"
           theme="primary"
           onClick={handleClick}
           padding={"12px 24px"}
@@ -143,7 +142,6 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
           <StyledParagraph>Connect your wallet to see your holdings</StyledParagraph>
         )}
         <ConnectButton
-          className="WalletControl"
           theme="primary"
           onClick={handleClick}
           padding={"12px 24px"}
