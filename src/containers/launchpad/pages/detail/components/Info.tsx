@@ -14,7 +14,7 @@ export function InfoSection({ presale }: Props) {
   const isMobile = useCheckIsMobile();
 
   return (
-    <Container className="InfoSection">
+    <Container>
       <div>
         <StyledImage src={presale.data.iconUrl} />
       </div>

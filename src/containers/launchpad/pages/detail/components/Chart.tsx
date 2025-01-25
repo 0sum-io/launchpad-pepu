@@ -42,7 +42,7 @@ export function Chart({ presale }: { presale: ParsedPresale }) {
   }, [data, presale.name]);
 
   return (
-    <Container className="bg-black ChartContainer">
+    <Container className="bg-black">
       <div
         id="chartcontrols"
         style={{ height: "auto", padding: "5px 45px 0 15px" }}

@@ -12,7 +12,6 @@ export namespace Input {
     const inputRef = useRef<HTMLInputElement>();
     return (
       <SearchInputField
-        className="SearchTokens"
         onClick={() => inputRef.current.focus()}
         bordered={props.bordered}
       >

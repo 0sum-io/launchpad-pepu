@@ -15,19 +15,16 @@ const MainPageStatistics = () => {
 
   return (
     <div>
-      <Flex.CenterVertical>
-        <Spacing width={8} />
-      </Flex.CenterVertical>
-      <Spacing height={20} />
-      <Container className="StatisticsTable">
-        <Flex.CenterVertical style={{ width: "100%", marginLeft: "auto" }}>
+      <Spacing height={20} width={8} />
+      <Container>
+        {/* <Flex.CenterVertical style={{ width: "100%", marginLeft: "auto" }}> */}
           <TabItem active={tab === "24H"} onClick={() => setTab("24H")} style={{ width: "40px" }}>
             24H
           </TabItem>
           {/* <TabItem active={tab === "Traders"} onClick={() => setTab("Traders")}>
             1H
           </TabItem> */}
-        </Flex.CenterVertical>
+        {/* </Flex.CenterVertical> */}
         <TableContainer>
           <Stats24H />
           {/* {tab === "24H" ? (

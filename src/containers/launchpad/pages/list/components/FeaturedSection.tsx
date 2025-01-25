@@ -125,7 +125,7 @@ export function FeaturedSection() {
 
   return (
     data && (
-        <Container className="FeaturedSection">
+        <Container>
 
           <div style={isMobile ? 
             { display: "flex", justifyContent: "space-between", flexDirection: "column", alignItems: "center" } : 
