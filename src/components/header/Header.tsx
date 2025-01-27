@@ -22,11 +22,17 @@ export function Header() {
         <Link href="/">
           <NavItem>Home</NavItem>
         </Link>
-        <Link href="/">
-          <NavItem>How It Works 
-            <ArrowTopRightOnSquareIcon width={25} style={{ paddingLeft: "5px", marginBottom: "5px" }} color="#2eb335" />
-          </NavItem>
-        </Link>
+        {process.env.NEXT_PUBLIC_HOW_IT_WORKS && (
+          <a
+            href={process.env.NEXT_PUBLIC_HOW_IT_WORKS}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <NavItem>How It Works 
+              <ArrowTopRightOnSquareIcon width={25} style={{ paddingLeft: "5px", marginBottom: "5px" }} color="#2eb335" />
+            </NavItem>
+          </a>
+        )}
         {process.env.NEXT_PUBLIC_DEX_URL && (
           <a
             href={process.env.NEXT_PUBLIC_DEX_URL}
@@ -53,7 +59,7 @@ export function Header() {
             color: "#285fb0",
             marginLeft: "20px"
           }}
-          onClick={() => window.open("https://twitter.com", "_blank")}
+          onClick={() => window.open("https://x.com/pepe_unchained", "_blank")}
         >
           <img
             src="/images/twitter.svg"
@@ -76,7 +82,7 @@ export function Header() {
             color: "#285fb0",
             marginLeft: "20px"
           }}
-          onClick={() => window.open("https://telegram.org", "_blank")}
+          onClick={() => window.open("https://t.me/pepeunchained", "_blank")}
         >
           <img
             src="/images/telegram.svg"
