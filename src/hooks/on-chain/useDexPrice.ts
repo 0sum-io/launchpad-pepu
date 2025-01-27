@@ -1,20 +1,42 @@
 export async function fetchQuote(): Promise<string> {
   const query = `
-    query GetDexPrice {
+   query GetDexPrice {
     pools(
       where: {
-        and: [
-          # USDT
-          { token0_: { name: "USDT" } }
-          # WPEPU
-          { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
+        or: [
+          { 
+            and: [
+              { token0_: { symbol: "USDT" } }
+              { token1_: { id: "0x4200000000000000000000000000000000000006" } }
+            ]
+          }
+          { 
+            and: [
+              { token0_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token1_: { symbol: "USDT" } }
+            ]
+          }
+          { 
+            and: [
+              { token0_: { symbol: "USDC" } }
+              { token1_: { id: "0x4200000000000000000000000000000000000006" } }
+            ]
+          }
+          { 
+            and: [
+              { token0_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token1_: { symbol: "USDC" } }
+            ]
+          }
         ]
       }
-      orderBy: createdAtBlockNumber
-      orderDirection: asc
+      orderBy: txCount
+      orderDirection: desc
     ) {
       token0Price
       token1Price
+      txCount
+      feeTier
     }
   }
   `;
