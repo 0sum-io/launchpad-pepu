@@ -45,7 +45,7 @@ export async function getHolderList(
   return topHolders;
 }
 
-async function getBalanceOf(token, owner): Promise<ethers.BigNumber> {
+export async function getBalanceOf(token, owner): Promise<ethers.BigNumber> {
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.NEXT_PUBLIC_RPC_URL
   );
