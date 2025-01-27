@@ -19,7 +19,7 @@ export function InfoSection({ presale }: Props) {
         <StyledImage src={presale.data.iconUrl} />
       </div>
       <Spacing width={isMobile ? 16 : 20} />
-      <div style={{ padding: "8px 0" }}>
+      <div style={{ padding: "8px 0", width: "300px" }}>
         <Name>{presale.name}</Name>
         <Spacing height={isMobile ? 8 : 12} />
 
@@ -71,11 +71,6 @@ const BadgeContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 8px;
-  ${inDesktop(`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  `)}
 `;
 
 const Container = styled.div`
