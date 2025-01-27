@@ -1,4 +1,7 @@
 export async function fetchQuote(): Promise<string> {
+  if (!process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY)
+    throw new Error("NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY is not set");
+
   const query = `
    query GetDexPrice {
     pools(
@@ -7,24 +10,24 @@ export async function fetchQuote(): Promise<string> {
           { 
             and: [
               { token0_: { symbol: "USDT" } }
-              { token1_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
             ]
           }
           { 
             and: [
-              { token0_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
               { token1_: { symbol: "USDT" } }
             ]
           }
           { 
             and: [
               { token0_: { symbol: "USDC" } }
-              { token1_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
             ]
           }
           { 
             and: [
-              { token0_: { id: "0x4200000000000000000000000000000000000006" } }
+              { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()}" } }
               { token1_: { symbol: "USDC" } }
             ]
           }
@@ -33,10 +36,14 @@ export async function fetchQuote(): Promise<string> {
       orderBy: txCount
       orderDirection: desc
     ) {
+      token0 {
+        id
+      }
+      token1 {
+        id
+      }
       token0Price
       token1Price
-      txCount
-      feeTier
     }
   }
   `;
@@ -48,5 +55,18 @@ export async function fetchQuote(): Promise<string> {
     },
     body: JSON.stringify({ query }),
   }).then((res) => res.json());
-  return json.data.pools[0].token0Price;
+
+  if (
+    json.data.pools[0].token0.id ===
+    process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()
+  ) {
+    return json.data.pools[0].token1Price;
+  }
+
+  if (
+    json.data.pools[0].token1.id ===
+    process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY.toLowerCase()
+  ) {
+    return json.data.pools[0].token0Price;
+  }
 }
