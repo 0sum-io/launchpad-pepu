@@ -73,9 +73,9 @@ export function Steps() {
       paymentToken: form.value.paymentToken,
       name: form.value.name,
       symbol: form.value.symbol,
-      amountToRaise: 1_000, // Number(form.value.amountToRaise),
-      totalSupply: 10_000_000, // form.value.totalSupply,
-      amountToSale: 10_000_000, // form.value.totalSupply - form.value.minterAllocation,
+      amountToRaise: 2_500_000, // Number(form.value.amountToRaise),
+      totalSupply: 1_000_000_000, // form.value.totalSupply,
+      amountToSale: 1_000_000_000, // form.value.totalSupply - form.value.minterAllocation,
       data: {
         websiteUrl: form.value.websiteUrl,
         xUrl: form.value.xUrl,
