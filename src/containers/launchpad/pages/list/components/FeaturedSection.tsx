@@ -3,24 +3,20 @@ import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { formatDecimals } from "utils/format";
-import { usePresaleList } from "../../../hooks/usePresaleList";
-import { usePools } from "../../../hooks/usePools";
-import { addressIsSame } from "utils/addressIsSame";
 import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCheckIsMobile } from "@boxfoxs/bds-web";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
 import dynamic from 'next/dynamic';
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
+import { formatUnits } from "@ethersproject/units";
 
 const WalletControlLazy = dynamic(() => import('../../../../../components/header/WalletControl'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
 });
 
-export function FeaturedSection() {
-  const [data, setData] = useState(undefined);
-  const presaleList = usePresaleList();
-  const pools = usePools();
+const FeaturedSection = () => {
+  const [data, setFeaturedData] = useState(undefined);
 
   const router = useRouter();
   const isMobile = useCheckIsMobile();
@@ -31,51 +27,49 @@ export function FeaturedSection() {
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
-      console.log("Dex price: ", price);
       setDexPrice(parseFloat(price));
     };
     fetchDexPrice();
   }, []);
 
   useEffect(() => {
-    if (!presaleList.data || !pools.data || dexPrice === 0) return;
 
-    // derive market cap from pools and presales
-    const withVolumeInWpepu = presaleList.data.map((i) => {
-      const data = pools.data.find((v) => addressIsSame(v.id, i.pairAddress));
-      const volumeInWpepu = addressIsSame(data.token0.id, i.token)
-        ? data.volumeToken1
-        : data.volumeToken0;
-      return { ...i, volumeInWpepu };
-    });
-    // fetch last swap data
-    fetchData(withVolumeInWpepu);
+    if (dexPrice === 0) return;
+    fetchPoolWithHighestPrice();
 
+    // We are setting fetch for presale list here
     const interval = setInterval(() => {
-      fetchData(withVolumeInWpepu);
-    }, 5000);
+      fetchPoolWithHighestPrice();
+    }, 15000);
 
     return () => clearInterval(interval);
-  }, [presaleList.data, pools.data]);
+  }, [dexPrice]);
 
-  // fetch data from graphql
-  const fetchData = async (withVolumeInWpepu: any[]) => {
+  // fetch pool with highest token price in WPEPU
+  const fetchPoolWithHighestPrice = async () => {
     const query = `
-        query LastSwap {
-          swaps(first: 1, orderBy: timestamp, orderDirection: desc) {
-            token0 {
-              name
+        query GetHighestPriceToken {
+          pools(orderBy: token0Price, orderDirection: desc) {
+            id
+            volumeToken0
+            volumeToken1
+            token0Price
+            token1Price
+            token1 {
               id
-              volume
+              name
               symbol
             }
-            amount0
-            amount1
+            token0 {
+              id
+              name
+              symbol
+            }
           }
         }
     `;
 
-    const json = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+    const highestPriceTokenJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,42 +77,72 @@ export function FeaturedSection() {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    const presale = withVolumeInWpepu.find(
-      (i) => i.token === json.data.swaps[0].token0.id
-    );
+    // Find the first record where token0 is not "WPEPU"
+    const highestValueToken = highestPriceTokenJson.data.pools.find(pool => pool.token0.symbol !== "WPEPU");
 
-    /* console.log("json ----> ", json);
-    console.log("presale ----> ", presale); */
-
-    let tokenAmount0 = parseFloat(json.data.swaps[0].amount0);
-    let tokenAmount1 = parseFloat(json.data.swaps[0].amount1);
-
-    // Make sure that token amount is not negative
-    tokenAmount0 = tokenAmount0 < 0 ? (tokenAmount0 * -1) : tokenAmount0;
-    tokenAmount1 = tokenAmount1 < 0 ? (tokenAmount1 * -1) : tokenAmount1;
-
-    // Calculate the price of token0 in WPEPU/token0
-    const price = tokenAmount1 / tokenAmount0;
+    // Calculate the price of token0 in WPEPU/token0 and with 18 decimals
+    highestValueToken['price'] = formatUnits(parseInt(highestValueToken.token0Price), 18);
     // Calculate the price in USD
-    const priceInUSD = price * dexPrice;
+    highestValueToken['priceInUSD'] = highestValueToken['price'] * dexPrice;
     // Calculate current market cap (supply is 1B)
-    const marketCap = 1000000000 * priceInUSD;
+    highestValueToken['marketCap'] = 10000000 * highestValueToken['priceInUSD'];
     // Calculate percentage change (current market cap / initial market cap * 100)
-    const percentageChange = ((1000000000 * priceInUSD) / 150) * 100;
+    highestValueToken['percentageChange'] = ((10000000 * highestValueToken['priceInUSD']) / 150) * 100;
 
-    setData({
-      id: json.data.swaps[0].token0.id,
-      name: json.data.swaps[0].token0.name,
-      symbol: json.data.swaps[0].token0.symbol,
-      marketCap: marketCap,
+    // console.log("highestPriceTokenJson ----> ", highestValueToken);
+
+    // We need iconUrl and description from presale data
+    fetchPresale(highestValueToken);
+  };
+
+  // fetch one presale data from graphql
+  const fetchPresale = async (tokenObject: any) => {
+      const query = `
+        query GetTokenData {
+          presales(where: { id: "${tokenObject.id}" }) {
+            id
+            data
+            name
+            pairAddress
+            paymentToken
+            presaleAmount
+            saleAmount
+            symbol
+            token
+            totalSupply
+            transactionHash
+            blockTimestamp
+            blockNumber
+            minter
+          }
+        }
+    `;
+
+    const tokenDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    // console.log("tokenDataJson ----> ", tokenDataJson);
+    // Parse the data and set the featured data
+    tokenDataJson.data.presales[0].data = JSON.parse(tokenDataJson.data.presales[0].data);
+
+    setFeaturedData({
+      id: tokenObject.token0.id,
+      name: tokenObject.token0.name,
+      symbol: tokenObject.token0.symbol,
+      marketCap: tokenObject.marketCap,
       initial_wpepu_price: 0.00001,
       initial_market_cap: 150,
-      priceInWpepu: price,
-      priceInUSD: priceInUSD,
-      percentageChange: percentageChange,
+      priceInWpepu: tokenObject.price,
+      priceInUSD: tokenObject.priceInUSD,
+      percentageChange: tokenObject.percentageChange,
       data: {
-        iconUrl: presale.data.iconUrl,
-        description: presale.data.description,
+        iconUrl: tokenDataJson?.data?.presales[0].data?.iconUrl,
+        description: tokenDataJson?.data?.presales[0].data?.description,
       },
     });
   };
@@ -197,7 +221,9 @@ export function FeaturedSection() {
         </Container>
     )
   );
-}
+};
+
+export default FeaturedSection;
 
 const Container = styled.div`
   z-index: 1;

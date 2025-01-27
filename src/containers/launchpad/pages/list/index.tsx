@@ -2,9 +2,13 @@ import { inDesktop, Spacing, useCheckIsMobile } from "@boxfoxs/bds-web";
 import styled from "@emotion/styled";
 import { PageContainer } from "components/PageContainer";
 import { useSortedPresaleList } from "../../hooks/useSortedPresaleList";
-import { OrderSection, TitleSection, FeaturedSection } from "./components";
+import { OrderSection, TitleSection } from "./components";
 import { useMemo, useRef, useState } from "react";
 import dynamic from 'next/dynamic';
+
+const FeaturedSection = dynamic(() => import('./components/FeaturedSection'), {
+  loading: () => <p>Loading...</p>, // Optional fallback while loading
+});
 
 const SaleCard = dynamic(() => import('./components/SaleCard'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
