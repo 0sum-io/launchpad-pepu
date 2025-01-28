@@ -6,11 +6,19 @@ import { SnackBarProvider } from "components/snackbar/SnackBarProvider";
 import { ColorModeProvider } from "hooks/common";
 import type { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { RecoilRoot } from "recoil";
 import "../styles/globals.scss";
 import Head from "next/head";
-import LatestPurchasesTicker from "containers/launchpad/pages/list/components/LatestPurchases";
-import NewListingsTicker from "containers/launchpad/pages/list/components/NewListings";
+import dynamic from "next/dynamic";
+
+const LatestPurchasesTicker = dynamic(
+  () => import("containers/launchpad/pages/list/components/LatestPurchases"),
+  { ssr: false }
+);
+
+const NewListingsTicker = dynamic(
+  () => import("containers/launchpad/pages/list/components/NewListings"),
+  { ssr: false }
+);
 
 const client = new QueryClient({
   defaultOptions: {
@@ -40,23 +48,21 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
       <RootProvider>
-          <RecoilRoot>
-            <QueryClientProvider client={client}>
-              <LatestPurchasesTicker />
-                <RootStateProvider>
-                  <PortalProvider>
-                    <SnackBarProvider>
-                      <PopupProvider>
-                        <RootContainer>
-                          <Component {...pageProps} />
-                        </RootContainer>
-                      </PopupProvider>
-                    </SnackBarProvider>
-                  </PortalProvider>
-                </RootStateProvider>
-              <NewListingsTicker />
-            </QueryClientProvider>
-          </RecoilRoot>
+        <QueryClientProvider client={client}>
+          <LatestPurchasesTicker />
+            <RootStateProvider>
+              <PortalProvider>
+                <SnackBarProvider>
+                  <PopupProvider>
+                    <RootContainer>
+                      <Component {...pageProps} />
+                    </RootContainer>
+                  </PopupProvider>
+                </SnackBarProvider>
+              </PortalProvider>
+            </RootStateProvider>
+          <NewListingsTicker />
+        </QueryClientProvider>
       </RootProvider>
     </ColorModeProvider>
   );
