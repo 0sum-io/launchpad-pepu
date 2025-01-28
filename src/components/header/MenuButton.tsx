@@ -26,7 +26,7 @@ export function MenuControl({ isMenuOpen, setIsMenuOpen }: Props) {
   }, [isMenuOpen]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", marginLeft: "auto" }}>
       <button onClick={() => setIsMenuOpen((prev) => !prev)}>
         {isMenuOpen ? (
           <XMarkIcon width={24} color="white" />
@@ -64,10 +64,11 @@ export function MenuControl({ isMenuOpen, setIsMenuOpen }: Props) {
 const DropDownMenu = styled.div`
   display: flex;
   flex-direction: column;
+  -webkit-box-align: center;
   align-items: center;
   position: absolute;
-  right: -16px;
   top: 40px;
+  left: -340px;
   width: 100vw;
   height: 100vh;
   background: #0f0f0f;
@@ -92,4 +93,9 @@ const MenuButton = styled(Flex.Center)<{ active: boolean }>`
   ${pressableStyle.background()}
 `;
 
-const MENU_ITEMS = [{ label: "Launchpad", path: "/launchpad" }];
+const MENU_ITEMS = [
+  { label: "How It Works", path: process.env.NEXT_PUBLIC_HOW_IT_WORKS },
+  { label: "Swap", path: process.env.NEXT_PUBLIC_DEX_URL },
+  { label: "X", path: "https://x.com/pepe_unchained" },
+  { label: "Telegram", path: "https://t.me/pepeunchained" },
+];
