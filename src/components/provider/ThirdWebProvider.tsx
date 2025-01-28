@@ -7,10 +7,8 @@ export const thirdwebClient = createThirdwebClient({
 
 export const thirdwebAllowedWallets = [
   createWallet("io.metamask"),
-  createWallet("net.gateweb3"),
-  createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
   walletConnect(),
+  createWallet("com.coinbase.wallet"),
 ];
 
 import { thirdwebChain } from "constants/chains";
