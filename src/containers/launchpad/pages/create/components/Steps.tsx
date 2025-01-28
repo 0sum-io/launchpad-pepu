@@ -13,7 +13,6 @@ import { useAsyncCallback } from "@boxfoxs/core-hooks";
 import styled from "@emotion/styled";
 import { uploadImage } from "remotes/uploadImage";
 import { hoverableStyle } from "utils/style";
-import { WalletControl } from "components/header/WalletControl";
 
 export function Steps() {
   const form = useCreatePresaleState();

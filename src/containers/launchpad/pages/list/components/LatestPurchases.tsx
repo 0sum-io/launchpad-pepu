@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { useSortedPresaleList } from "containers/launchpad/hooks";
+import { inDesktop } from "@boxfoxs/bds-web";
 
 const LatestPurchasesTicker = () => {
   let [purchases, setData] = useState([]);
   const sortedPresales = useSortedPresaleList();
 
   useEffect(() => {
-    if (!sortedPresales || !purchases) return;
+    if (!sortedPresales) return;
     
     // Function to update the data
     const updateData = async () => {
@@ -29,8 +30,9 @@ const LatestPurchasesTicker = () => {
       setData(newDataSet);
     };
 
+    updateData();
     // Set up the interval
-    const interval = setInterval(updateData, 5000); // Every 5 seconds
+    const interval = setInterval(updateData, 60000); // Every 60 seconds
 
     // Clean up the interval when the component unmounts
     return () => clearInterval(interval);
@@ -41,7 +43,7 @@ const LatestPurchasesTicker = () => {
   const fetchData = async () => {
     const query = `
         query LastSwap {
-          swaps(orderBy: timestamp, orderDirection: desc) {
+          swaps(orderBy: timestamp, orderDirection: desc, limit: 25) {
             token0 {
               name
               id
@@ -78,17 +80,7 @@ const LatestPurchasesTicker = () => {
 
   return (
     <TickerContainer>
-        <p style={{ 
-            display: "flex",
-            alignItems: "center",
-            fontSize: "22px", 
-            fontWeight: "700", 
-            minWidth: "270px", 
-            height: "32px",
-            paddingLeft: "50px", 
-            background: "#2eb335", 
-            zIndex: "1", 
-            maskImage: "linear-gradient(to left, transparent, black 10%, black 90%, transparent)" }}> Latest Purchases </p>
+        <Label> Latest Purchases </Label>
         <TickerWrapper>
             {purchases.map((purchase, index) => (
             <TickerItem key={index}>
@@ -116,11 +108,34 @@ const TickerContainer = styled.div`
   position: relative;
 `;
 
+const Label = styled.p`
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  min-width: 210px;
+  height: 32px;
+  background: #2eb335;
+  z-index: 1;
+  padding-left: 20px;
+  mask-image: linear-gradient(to left, transparent, black 15%, black 95%, transparent);
+
+  ${inDesktop(`
+    min-width: 250px;
+    font-size: 22px;
+    padding-left: 50px;
+    mask-image: linear-gradient(to left, transparent, black 5%, black 90%, transparent);
+  `)}
+`;
+
 const TickerWrapper = styled.div`
   display: flex;
   gap: 24px;
   white-space: nowrap;
-  animation: scroll 45s linear infinite;
+  animation: scroll 60s linear infinite;
+
+  /* Offset the animation */
+  animation-delay: -15s;
 
   @keyframes scroll {
     0% {

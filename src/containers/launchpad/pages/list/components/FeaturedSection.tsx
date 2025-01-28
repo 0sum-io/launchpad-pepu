@@ -157,10 +157,10 @@ const FeaturedSection = () => {
             
             <WalletControlLazy left={isMobile ? "0px" : "-100px"} />
 
-            <div style={{ width: "50%" }}>
+            <div style={{ width: isMobile ? "80%" : "50%" }}>
             <Featured style={isMobile ? {marginTop: "30px"} : {marginTop: "0px"}}>FEATURED</Featured>
               <a href={data?.id}>
-                <Flex.CenterHorizontal style={{ zIndex: "1" }}>
+                <Flex.CenterHorizontal style={{ zIndex: 1 }}>
                   <StyledImage src={data?.data.iconUrl} />
                   <Spacing width={32} />
 
@@ -171,14 +171,23 @@ const FeaturedSection = () => {
                     </Title>
                     <Spacing height={12} />
 
-                    <SubContainer>
+                    <SubContainer style={{ height: isMobile ? "25px" : "50px" }}>
                       <Amount>
                         ${`${commaizeNumber(
                           formatDecimals(data.marketCap, 2)
                           )
                         }`}
                       </Amount>
-                      <Content style={{ paddingLeft: '10px', color: '#FFF' }}>MARKET CAP</Content>
+                      {
+                        isMobile && (
+                          <Content style={{ paddingLeft: '10px', color: '#FFF' }}> MC </Content>
+                        )
+                      }
+                      {
+                        !isMobile && (
+                          <Content style={{ paddingLeft: '10px', color: '#FFF' }}> MARKET CAP </Content>
+                        )
+                      }
                     </SubContainer>
 
                     <Content style={{ color: '#2eb335', fontWeight: '700', height: '30px' }}>
@@ -191,9 +200,6 @@ const FeaturedSection = () => {
                       <div className="live-dot"></div>
                       <span style={{ paddingTop: '2px' }}>LIVE NOW</span>
                     </LiveNowContainer>
-
-                    {/* <Content>{data?.data.description}</Content>
-                    <Spacing height={20} /> */}
 
                   </div>
                 </Flex.CenterHorizontal>
@@ -243,7 +249,6 @@ const SubContainer = styled.div`
   display: flex;
   align-items: baseline;
   font-weight: 700;
-  height: 50px;
   // -webkit-text-stroke: 1px black;
 `;
 
