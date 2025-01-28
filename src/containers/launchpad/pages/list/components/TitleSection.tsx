@@ -4,7 +4,6 @@ import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
 import { Badge } from "../../create/components/Components";
-import { WalletControl } from "components/header/WalletControl";
 
 export function TitleSection() {
   const router = useRouter();
