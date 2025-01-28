@@ -4,6 +4,7 @@ import { Logo } from "components/Logo";
 import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import { MenuControl } from "./MenuButton";
 
 export function Header() {
   const isMobile = useCheckIsMobile();
@@ -18,79 +19,85 @@ export function Header() {
       <Title> Pepe’s Pump Pad </Title>
       <Spacing width={40} />
 
-      <NavListContainer style={{ marginLeft: "auto" }}>
-        <Link href="/">
-          <NavItem>Home</NavItem>
-        </Link>
-        {process.env.NEXT_PUBLIC_HOW_IT_WORKS && (
-          <a
-            href={process.env.NEXT_PUBLIC_HOW_IT_WORKS}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <NavItem>How It Works 
-              <ArrowTopRightOnSquareIcon width={25} style={{ paddingLeft: "5px", marginBottom: "5px" }} color="#2eb335" />
-            </NavItem>
-          </a>
-        )}
-        {process.env.NEXT_PUBLIC_DEX_URL && (
-          <a
-            href={process.env.NEXT_PUBLIC_DEX_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <NavItem>Swap</NavItem>
-          </a>
-        )}
-      </NavListContainer>
+      {isMobile && <MenuControl isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />}
 
-      <Flex.CenterVertical style={{ marginLeft: "0px" }}>
-        <button
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "48px",
-            height: "48px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            transition: "background-color 0.3s ease",
-            color: "#285fb0",
-            marginLeft: "20px"
-          }}
-          onClick={() => window.open("https://x.com/pepe_unchained", "_blank")}
-        >
-          <img
-            src="/images/twitter.svg"
-            alt="Twitter"
-            style={{ width: "48px", height: "48px" }}
-          />
-        </button>
+      {!isMobile && 
+        <NavListContainer style={{ marginLeft: "auto" }}>
+          <Link href="/">
+            <NavItem>Home</NavItem>
+          </Link>
+          {process.env.NEXT_PUBLIC_HOW_IT_WORKS && (
+            <a
+              href={process.env.NEXT_PUBLIC_HOW_IT_WORKS}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <NavItem>How It Works 
+                <ArrowTopRightOnSquareIcon width={25} style={{ paddingLeft: "5px", marginBottom: "5px" }} color="#2eb335" />
+              </NavItem>
+            </a>
+          )}
+          {process.env.NEXT_PUBLIC_DEX_URL && (
+            <a
+              href={process.env.NEXT_PUBLIC_DEX_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <NavItem>Swap</NavItem>
+            </a>
+          )}
+        </NavListContainer>
+      }
 
-        <button
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "48px",
-            height: "48px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            transition: "background-color 0.3s ease",
-            color: "#285fb0",
-            marginLeft: "20px"
-          }}
-          onClick={() => window.open("https://t.me/pepeunchained", "_blank")}
-        >
-          <img
-            src="/images/telegram.svg"
-            alt="Telegram"
-            style={{ width: "48px", height: "48px" }}
-          />
-        </button>
-      </Flex.CenterVertical>
+      {!isMobile && 
+        <Flex.CenterVertical style={{ marginLeft: "0px" }}>
+          <button
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "48px",
+              height: "48px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+              color: "#285fb0",
+              marginLeft: "20px"
+            }}
+            onClick={() => window.open("https://x.com/pepe_unchained", "_blank")}
+          >
+            <img
+              src="/images/twitter.svg"
+              alt="Twitter"
+              style={{ width: "48px", height: "48px" }}
+            />
+          </button>
+
+          <button
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "48px",
+              height: "48px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+              color: "#285fb0",
+              marginLeft: "20px"
+            }}
+            onClick={() => window.open("https://t.me/pepeunchained", "_blank")}
+          >
+            <img
+              src="/images/telegram.svg"
+              alt="Telegram"
+              style={{ width: "48px", height: "48px" }}
+            />
+          </button>
+        </Flex.CenterVertical>
+      }
 
     </HeaderContainer>
   );
