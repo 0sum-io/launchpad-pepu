@@ -48,6 +48,7 @@ export function Chart({ presale }: { presale: ParsedPresale }) {
         style={{ height: "auto", padding: "5px 45px 0 15px" }}
       ></div>
       <div id="chartdiv" style={{ width: "100%", height: "500px" }}></div>
+      <div style={{ width: "100px", height: "30px", position: "absolute", bottom: "25px", background: "#0f0f0f" }}></div>
     </Container>
   );
 }
@@ -56,6 +57,7 @@ const Container = styled.div`
   padding: 24px 24px 32px 24px;
   border-radius: 16px;
   border: 2px solid #272727;
+  position: relative;
 `;
 
 const renderChart = (

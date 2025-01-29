@@ -81,7 +81,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
       <Spacing height={24} />
       <TokenInput
         icon={isBuy ? getTokenIcon(paymentToken.data) : presale.data.iconUrl}
-        symbol={isBuy ? paymentToken.data?.symbol : presale.symbol}
+        symbol={isBuy ? paymentToken.data?.symbol : presale.name}
         value={inValue}
         onChange={setInValue}
         balance={Number(balance?.toExact() || 0)}
@@ -100,7 +100,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
             color="#fff"
           >
             {getClearedSymbol(
-              isBuy ? presale.symbol : paymentToken.data?.symbol
+              isBuy ? presale.name : paymentToken.data?.symbol
             )}
           </Text>
           <Spacing flex={1} />
@@ -130,6 +130,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
           }}
           onClick={swap.callback}
           loading={swap.isLoading}
+          disabled={Number(balance?.toExact()) == 0}
         >
           {!account
             ? "Connect Wallet"
