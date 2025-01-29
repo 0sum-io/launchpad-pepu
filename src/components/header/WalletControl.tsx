@@ -77,6 +77,10 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
 
     // Show highest balance first
     walletHoldingsJson.data.accountBalances.sort((a, b) => b.balance - a.balance);
+    // Filter out those with dust balance means less than 0.0000000001 
+    walletHoldingsJson.data.accountBalances = walletHoldingsJson.data.accountBalances.filter(token => token.balance > 0.0001);
+    console.log("Outputs an array of token balances >>>>>>>>", walletHoldingsJson.data.accountBalances); // Outputs an array of token balances
+    
     setWalletData(walletHoldingsJson.data.accountBalances);
   };
 

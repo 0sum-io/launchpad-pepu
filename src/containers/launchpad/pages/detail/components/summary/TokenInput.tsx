@@ -28,7 +28,15 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
         <Spacing flex={1} />
         <Txt>Balance</Txt>
         <Spacing width={4} />
-        <Txt style={{ fontSize: "16px", fontWeight: "700" }}>{commaizeNumber(formatDecimals(balance, 5))}</Txt>
+
+        {/* Not showing dust balance */}
+        { Number(commaizeNumber(formatDecimals(balance, 18))) < 0.0001 &&
+          <Txt style={{ fontSize: "16px", fontWeight: "700" }}>0</Txt>
+        }
+        { Number(commaizeNumber(formatDecimals(balance, 18))) > 0.0001 &&
+          <Txt style={{ fontSize: "16px", fontWeight: "700" }}>{commaizeNumber(formatDecimals(balance, 18))}</Txt>
+        }
+
       </Flex.CenterVertical>
       <Spacing height={8} />
       <Container>
@@ -49,8 +57,11 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
           onChange={(e) => onChange(e.target.value || undefined)}
         />
         <Spacing width={12} />
-        <MaxButton onClick={() => onChange(String(formatDecimals(balance, 5)))}>
-          MAX
+
+        {/* Disable on dust balance */}
+        <MaxButton onClick={() => onChange(String(formatDecimals(balance, 18)))} 
+          disabled={Number(commaizeNumber(formatDecimals(balance, 18))) < 0.0001}>
+            MAX
         </MaxButton>
       </Container>
     </div>
@@ -109,6 +120,11 @@ const MaxButton = styled.button`
   border-radius: 24px;
   border: 1px solid var(--primary-1, ${process.env.NEXT_PUBLIC_COLOR});
   padding: 7px 15px;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
   ${inDesktop(`
     padding: 9px 15px;
   `)}

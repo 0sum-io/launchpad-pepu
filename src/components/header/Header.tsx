@@ -16,7 +16,9 @@ export function Header() {
     >
 
       <Logo />
-      <Title> Pepe’s Pump Pad </Title>
+      <Link href="/">
+        <Title> Pepe’s Pump Pad </Title>
+      </Link>
       <Spacing width={40} />
 
       {isMobile && <MenuControl isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />}
@@ -128,6 +130,7 @@ const Title = styled.h1`
   color: #2eb335;
   font-weight: 700;
   font-size: 14px;
+  cursor: pointer;
     ${inDesktop(`
     font-size: 27px;
   `)}
@@ -143,8 +146,4 @@ const NavItem = styled.button<{ active?: boolean }>`
   font-size: 20px;
   cursor: pointer;
   font-weight: 700;
-  :hover {
-    padding: 10px 20px;
-    transition: all 250ms ease;
-  }
 `;
