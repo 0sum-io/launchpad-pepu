@@ -56,7 +56,7 @@ export function TXNS({ data }: { data: ParsedPresale }) {
             </TableHeader> */}
             <TableHeader>
               <Flex.CenterVertical>
-                {getClearedSymbol(tokenInfo.data?.symbol || "-")}
+                {process.env.NEXT_PUBLIC_CHAIN_SYMBOL}
                 {/* <Spacing width={4} />
               <button>
                 <img
