@@ -33,7 +33,7 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
       <Spacing height={8} />
 
       { balance == 0 &&
-        <Txt>Your PEPU balance is too low, <a href={process.env.NEXT_PUBLIC_DEX_URL} target="_blank" style={{ textDecoration: "underline" }}>buy here</a> </Txt>
+        <Txt>Your PEPU balance is too low, <a href={process.env.NEXT_PUBLIC_DEX_URL} target="_blank" style={{ textDecoration: "underline" }} rel="noreferrer">buy here</a> </Txt>
       }
 
       <Spacing height={8} />
