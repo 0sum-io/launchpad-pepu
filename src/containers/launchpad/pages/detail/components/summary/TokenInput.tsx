@@ -31,6 +31,12 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
         <Txt style={{ fontSize: "16px", fontWeight: "700" }}>{commaizeNumber(formatDecimals(balance, 5))}</Txt>
       </Flex.CenterVertical>
       <Spacing height={8} />
+
+      { balance == 0 &&
+        <Txt>Your PEPU balance is too low, <a href={process.env.NEXT_PUBLIC_DEX_URL} target="_blank" style={{ textDecoration: "underline" }}>buy here</a> </Txt>
+      }
+
+      <Spacing height={8} />
       <Container>
         <TokenIcon>
           <img src={icon} alt="" />
