@@ -85,9 +85,9 @@ const FeaturedSection = () => {
     // Calculate the price in USD
     highestValueToken['priceInUSD'] = highestValueToken['price'] * dexPrice;
     // Calculate current market cap (supply is 1B)
-    highestValueToken['marketCap'] = 10000000 * highestValueToken['priceInUSD'];
+    highestValueToken['marketCap'] = 1000000000 * highestValueToken['priceInUSD'];
     // Calculate percentage change (current market cap / initial market cap * 100)
-    highestValueToken['percentageChange'] = ((10000000 * highestValueToken['priceInUSD']) / 150) * 100;
+    highestValueToken['percentageChange'] = ((1000000000 * highestValueToken['priceInUSD']) / 1200) * 100;
 
     // console.log("highestPriceTokenJson ----> ", highestValueToken);
 
@@ -135,8 +135,8 @@ const FeaturedSection = () => {
       name: tokenObject.token0.name,
       symbol: tokenObject.token0.symbol,
       marketCap: tokenObject.marketCap,
-      initial_wpepu_price: 0.00001,
-      initial_market_cap: 150,
+      initial_wpepu_price: 0.0001,
+      initial_market_cap: 1200,
       priceInWpepu: tokenObject.price,
       priceInUSD: tokenObject.priceInUSD,
       percentageChange: tokenObject.percentageChange,
