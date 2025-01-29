@@ -70,8 +70,8 @@ const Stats24H = () => {
           price: tokenAmount1 / tokenAmount0,
           priceInUSD: (tokenAmount1 / tokenAmount0) * dexPrice,
           marketCap: ((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000,
-          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 150) * 100,
-          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 150),
+          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200) * 100,
+          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200),
           tokenInfo: tokenDetails || {}, // Add the corresponding token info
         };
       }

@@ -86,7 +86,19 @@ export default function HomePage() {
             ))}
           </GridListContainer>
 
-          <ScrollButton onClick={() => handleScroll("right")} style={isMobile ? {right: "45%"} : {right: "50px"}}>
+          <ScrollButton onClick={() => handleScroll("left")} style={isMobile ? {left: "25%"} : {left: "50px"}}>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "rotateY(180deg)" }}>
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </ScrollButton>
+
+          <ScrollButton onClick={() => handleScroll("right")} style={isMobile ? {right: "25%"} : {right: "50px"}}>
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M9 6l6 6-6 6"
@@ -195,7 +207,7 @@ const StarImage = styled.img`
 
 const ScrollButton = styled.button`
   position: absolute;
-  top: 50%;
+  top: 48%;
   transform: translateY(300%);
   width: 48px;
   height: 48px;
@@ -225,4 +237,8 @@ const ScrollButton = styled.button`
     height: 44px;
     color: #000;
   }
+
+  ${inDesktop(`
+    top: 50%;
+  `)}
 `;

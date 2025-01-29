@@ -130,6 +130,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
           }}
           onClick={swap.callback}
           loading={swap.isLoading}
+          disabled={Number(balance?.toExact()) == 0}
         >
           {!account
             ? "Connect Wallet"

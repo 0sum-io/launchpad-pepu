@@ -84,7 +84,7 @@ export const StyledInput = styled.input<{ error?: boolean }>`
   line-height: normal;
   background: #272727;
   border: 2px solid #393939;
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff;
   ${(p) => (p.error ? `border: 2px solid ${colors.red500};` : `border: 2px solid #393939`)}
   ${inDesktop(`
     height: 46px;
@@ -116,7 +116,7 @@ export const StyledTextArea = styled.textarea`
   line-height: 18px; /* 125% */
   background: #272727;
   border: 2px solid #393939;
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff;
     ${inDesktop(`
     height: 46px;
     padding: 12px 16px;
