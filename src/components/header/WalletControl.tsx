@@ -14,11 +14,17 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
   const open = useThirdWeb();
   const address = useAddress();
   const [tokenHoldings, setWalletData] = useState([]);
+  const [haveTokens, setTokenHoldingsState] = useState(undefined);
 
   // Fetch address holding after connecting wallet
   useEffect(() => {
 
     if (!address) return;
+
+    // Reset on wallet change
+    setTokenHoldingsState(undefined);
+    setWalletData([]);
+
     const addressFormated = address.toLowerCase();
     fetchWalletHoldings(addressFormated);
 
@@ -63,16 +69,22 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
     const allWalletTokens = await fetchTokenData(tokenIds);
 
     // Find out amount of each token via balanceOf calls
-    for (let token of walletHoldingsJson.data.accountBalances) {
-      const tokenBalance = await fetchBalanceOf(token);
-      token['balance'] = parseFloat(tokenBalance);
+    if (walletHoldingsJson.data.accountBalances.length > 0) {
+      for (let token of walletHoldingsJson.data.accountBalances) {
+        const tokenBalance = await fetchBalanceOf(token);
+        token['balance'] = parseFloat(tokenBalance);
 
-      // Find same token in allWalletTokens
-      const tokenData = allWalletTokens.find(t => t.token === token.token.id);
-      if (tokenData) {
-        token['data'] = JSON.parse(tokenData.data)
-        token['presale_id'] = tokenData.id;
-      };
+        // Find same token in allWalletTokens
+        const tokenData = allWalletTokens.find(t => t.token === token.token.id);
+        if (tokenData) {
+          token['data'] = JSON.parse(tokenData.data)
+          token['presale_id'] = tokenData.id;
+        };
+      }
+      setTokenHoldingsState(true);
+    } else {
+      console.log("No tokens found in the wallet");
+      setTokenHoldingsState(false);
     }
 
     // Show highest balance first
@@ -125,9 +137,15 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
           <>
             <PortfolioHolding>Your Portfolio Holdings</PortfolioHolding>
             {
-              tokenHoldings.length === 0 ? (
-                <StyledParagraph style={{ textAlign: "center" }}>Loading wallet balances...</StyledParagraph>
-              ) : (
+              haveTokens === false &&
+                <StyledParagraph style={{ textAlign: "center", fontSize: "13px", color: "#757575" }}>No tokens found in the wallet</StyledParagraph>
+            }
+            {
+              (tokenHoldings.length === 0 && haveTokens === undefined) &&
+                <StyledParagraph style={{ textAlign: "center", fontSize: "13px", color: "#757575" }}>Loading wallet balances...</StyledParagraph>
+            }
+            {
+              haveTokens &&
                 <TokenTable>
                   {tokenHoldings.map((token) => (
                     <a href={`/${token.token.id}`} key={token.id}>
@@ -148,9 +166,8 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
                     </a>
                   ))}
                 </TokenTable>
-              )
             }
-          </>
+            </>
         ) : (
           <StyledParagraph>Connect your wallet to see your holdings</StyledParagraph>
         )}
@@ -228,7 +245,7 @@ const TokenRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  padding: 6px 12px;
   border-radius: 8px;
   background-color: #1a1a1a;
 `;
