@@ -81,7 +81,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
       <Spacing height={24} />
       <TokenInput
         icon={isBuy ? getTokenIcon(paymentToken.data) : presale.data.iconUrl}
-        symbol={isBuy ? paymentToken.data?.symbol : presale.symbol}
+        symbol={isBuy ? process.env.NEXT_PUBLIC_CHAIN_SYMBOL : presale.symbol}
         value={inValue}
         onChange={setInValue}
         balance={Number(balance?.toExact() || 0)}
@@ -100,7 +100,7 @@ const TradeCard = ({ presale }: { presale: ParsedPresale }) => {
             color="#fff"
           >
             {getClearedSymbol(
-              isBuy ? presale.symbol : paymentToken.data?.symbol
+              isBuy ? presale.symbol : process.env.NEXT_PUBLIC_CHAIN_SYMBOL
             )}
           </Text>
           <Spacing flex={1} />

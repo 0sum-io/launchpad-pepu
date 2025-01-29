@@ -41,7 +41,7 @@ const SaleCard = ({ data }: { data: ParsedPresale }) => {
             <Amount>
               {commaizeNumber(formatDecimals(raisedAmount.data || 0, 4))} /{" "}
               {commaizeNumber(formatEther(data.presaleAmount))}{" "}
-              {getClearedSymbol(paymentToken.data?.symbol || "-")}
+              {process.env.NEXT_PUBLIC_CHAIN_SYMBOL}
             </Amount>
 
             <PercentageBadge>
