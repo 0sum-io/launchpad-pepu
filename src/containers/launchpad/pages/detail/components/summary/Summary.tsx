@@ -49,7 +49,7 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
             style={{ fontSize: isMobile ? "14px" : "14px", fontWeight: 500, fontFamily: "Grandstander" }}
           >
             / {commaizeNumber(formatEther(presale.presaleAmount))}{" "}
-            {getClearedSymbol(paymentToken.data?.symbol || "-")}
+            {process.env.NEXT_PUBLIC_CHAIN_SYMBOL}
           </Text>
         </div>
         <Spacing flex={1} />
