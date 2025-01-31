@@ -91,7 +91,7 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
     walletHoldingsJson.data.accountBalances.sort((a, b) => b.balance - a.balance);
     // Filter out those with dust balance means less than 0.0000000001 
     walletHoldingsJson.data.accountBalances = walletHoldingsJson.data.accountBalances.filter(token => token.balance > 0.0001);
-    console.log("Outputs an array of token balances >>>>>>>>", walletHoldingsJson.data.accountBalances); // Outputs an array of token balances
+    // console.log("Outputs an array of token balances >>>>>>>>", walletHoldingsJson.data.accountBalances); // Outputs an array of token balances
     
     setWalletData(walletHoldingsJson.data.accountBalances);
   };
@@ -117,7 +117,7 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    console.log("tokensDataJson ----> ", tokensDataJson);
+    // console.log("tokensDataJson ----> ", tokensDataJson);
     return tokensDataJson.data.presales;
   };
 

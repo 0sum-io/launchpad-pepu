@@ -22,11 +22,20 @@ const Stats24H = () => {
   const pools = usePools();
 
   let [dexPrice, setDexPrice] = useState(0);
+  const [initialMC, setInitialMarketCap] = useState(0);
 
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
       setDexPrice(parseFloat(price));
+
+      // Now we can calculate inital market cap
+      // PEPU price * token worth in PEPU * total supply
+      const initialMarketCap = parseFloat(price) * 0.0001 * 1000000000;
+      setInitialMarketCap(initialMarketCap);
+
+      console.log("PEPU dexPrice ----> ", dexPrice);
+      console.log("initialMarketCap ----> ", initialMarketCap);
     };
     fetchDexPrice();
   }, []);
@@ -70,8 +79,8 @@ const Stats24H = () => {
           price: tokenAmount1 / tokenAmount0,
           priceInUSD: (tokenAmount1 / tokenAmount0) * dexPrice,
           marketCap: ((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000,
-          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200) * 100,
-          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200),
+          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / initialMC) * 100,
+          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / initialMC),
           tokenInfo: tokenDetails || {}, // Add the corresponding token info
         };
       }
