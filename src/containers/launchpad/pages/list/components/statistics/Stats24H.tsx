@@ -1,9 +1,10 @@
 import { Spacing } from "@boxfoxs/bds-web";
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
+import { formatUnits } from "@ethersproject/units";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useSortedPresaleList } from "containers/launchpad/hooks";
-import { usePools } from "containers/launchpad/hooks/usePools";
+import { LoadingLottie } from "components/lotties/LoadingLottie";
+import { useQuoterContract } from "contracts/evm/contract/UniswapV3SwapQuoterContract";
 import {
   differenceInDays,
   differenceInHours,
@@ -11,18 +12,17 @@ import {
   differenceInSeconds,
 } from "date-fns";
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
-import { useEffect, useMemo, useState } from "react";
-import { addressIsSame } from "utils/addressIsSame";
+import { useEffect, useState } from "react";
 import { formatDecimals} from "utils/format";
 import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
-  const sortedPresales = useSortedPresaleList();
-  let [sortedPresalesTable, setData] = useState([]);
-  const pools = usePools();
-
   let [dexPrice, setDexPrice] = useState(0);
 
+  // Quoter params
+  const [highestPriceTokensOut, setHighestPriceTokensOut] = useState([]);
+
+  // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
@@ -31,100 +31,64 @@ const Stats24H = () => {
     fetchDexPrice();
   }, []);
 
-  const sumSwapsByToken = (swaps, tokenInfo) => {
-    // Create an object to store the sum for each token
-    const tokenSums = {};
-
-    // Iterate through all swaps
-    swaps.forEach((swap) => {
-      const tokenId = swap.token0.id;
-  
-      // Skip the specific token based on its ID or name
-      if (tokenId === "0xbe4c021f8fd2be76dbe9da6a000221ac6893aa3d") {
-        return; // Skip this token
-      }
-  
-      const volume = parseFloat(swap.token0.volume);
-  
-      // Initialize the sum for the token if not present
-      if (!tokenSums[tokenId]) {
-        const tokenDetails = tokenInfo.find((info) => info.token === tokenId) || {};
-
-        // console.log("Token swap data: ", swap);
-        
-        let tokenAmount0 = parseFloat(swap.amount0);
-        let tokenAmount1 = parseFloat(swap.amount1);
-        
-        tokenAmount0 = tokenAmount0 < 0 ? (tokenAmount0 * -1) : tokenAmount0;
-        tokenAmount1 = tokenAmount1 < 0 ? (tokenAmount1 * -1) : tokenAmount1;
-    
-        // console.log("Price in USD: ", (tokenAmount1 / tokenAmount0) * dexPrice);
-
-        tokenSums[tokenId] = {
-          id: tokenId,
-          name: swap.token0.name,
-          symbol: swap.token0.symbol,
-          volume: volume,
-          token0Amount: tokenAmount0,
-          token1Amount: tokenAmount1,
-          price: tokenAmount1 / tokenAmount0,
-          priceInUSD: (tokenAmount1 / tokenAmount0) * dexPrice,
-          marketCap: ((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000,
-          percentageChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200) * 100,
-          xChange: ((((tokenAmount1 / tokenAmount0) * dexPrice) * 1000000000) / 1200),
-          tokenInfo: tokenDetails || {}, // Add the corresponding token info
-        };
-      }
-  
-      // Add the current swap's volume to the total volume for the token
-      // tokenSums[tokenId].volume += volume;
-    });
-
-    // Convert the sums object into an array of results
-    // Return sorted results by volume
-    return Object.values(tokenSums).sort((a: any, b: any) => (b.volume * b.priceInUSD) - (a.volume * a.priceInUSD));
-  }
-
+  // Fetch highest price pool
   useEffect(() => {
-    if (!sortedPresales || !pools.data || dexPrice === 0) return;
+    if (dexPrice === 0) return;
+    fetchPoolWithHighestPrice();
 
-    // derive market cap from pools and presales
-    const withVolumeInWpepu = sortedPresales.map((i) => {
-      const data = pools.data.find((v) => addressIsSame(v.id, i.pairAddress));
-      const volumeInWpepu = addressIsSame(data.token0.id, i.token)
-        ? data.volumeToken1
-        : data.volumeToken0;
-      return { ...i, volumeInWpepu };
-    });
-    // console.log("withVolumeInWpepu", withVolumeInWpepu);
-    // fetch last swap data
-    fetchData(withVolumeInWpepu);
+    // We are setting fetch for presale list here
+    /* const interval = setInterval(() => {
+      fetchPoolWithHighestPrice();
+    }, 15000);
 
-    const interval = setInterval(() => {
-      fetchData(withVolumeInWpepu);
-    }, 5000);
+    return () => clearInterval(interval); */
+  }, [dexPrice]);
 
-    return () => clearInterval(interval);
-  }, [sortedPresales, pools.data, dexPrice]);
-
-  // fetch data from graphql
-  const fetchData = async (withVolumeInWpepu: any[]) => {
+  // fetch pool with highest token price in WPEPU
+  const fetchPoolWithHighestPrice = async () => {
     const query = `
-        query LastSwap {
-          swaps(orderBy: timestamp, orderDirection: desc) {
+        query GetHighestPriceToken {
+          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc) {
+            id
+            totalValueLockedToken0
+            totalValueLockedToken1
+            token1 {
+              name
+              symbol
+              id
+            }
             token0 {
               name
-              id
-              volume
               symbol
+              id
             }
-            amount0
-            amount1
+            volumeToken0
+            volumeToken1
+          }
+          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc) {
+            id
+            totalValueLockedToken0
+            totalValueLockedToken1
+            token1 {
+              name
+              symbol
+              id
+            }
+            token0 {
+              name
+              symbol
+              id
+            }
+            volumeToken0
+            volumeToken1
+          }
+          presales(where : { isEnd: false }) {
+            pairAddress
           }
         }
     `;
 
-    const json = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+    const highestPriceTokenJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -132,19 +96,149 @@ const Stats24H = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    // Deduplicate swaps by token0 ID
-    const uniqueSwaps = [];
-    const seenTokenIds = new Set();
+    // Now remove every ended presale from the list
+    const filteredData = filterPoolsByPresales(highestPriceTokenJson.data);
+    // console.log("filteredData 24H list >>>>>>>>", filteredData);
 
-    json.data.swaps.forEach((swap) => {
-      if (!seenTokenIds.has(swap.token0.id)) {
-        uniqueSwaps.push(swap);
-        seenTokenIds.add(swap.token0.id);
+    const highestTVLTokens = findAllTVLTokensSorted(filteredData);
+    // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
+
+    // Fetch presale data for highestTVLTokens
+    const tokenDatas = await fetchPresales(highestTVLTokens);
+    // console.log("tokenDatas >>>>>>>>", tokenDatas);
+
+    // Match same token with presale data and put 'data' from presale to token
+    for (let token of highestTVLTokens) {
+      const tokenData = tokenDatas.find((t) => t.id === token.id);
+      if (tokenData) {
+        token['iconUrl'] = tokenData.data.iconUrl;
+        token['description'] = tokenData.data.description;
+
+        // Set initial market cap that is totalValueLocked * dexPrice
+        token['initialMarketCap'] = 50 * dexPrice;
+        token['marketCap'] = token.totalValueLocked * dexPrice;
+      }
+    }
+
+    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
+    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
+    for (let token of highestTVLTokens) {
+      if (token.token0.symbol === "WPEPU") {
+        token['volume'] = parseFloat(token.volumeToken0) * dexPrice;
+        if (token.totalValueLocked === 0) {
+          token['xChange'] = 0;
+        } else {
+          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
+        }
+      } else {
+        token['volume'] = parseFloat(token.volumeToken1) * dexPrice;
+        if (token.totalValueLocked === 0) {
+          token['xChange'] = 0;
+        } else {
+          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
+        }
+      }
+    }
+
+    // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
+    setHighestPriceTokensOut(highestTVLTokens);
+    // We need iconUrl and description from presale data
+  };
+
+  function filterPoolsByPresales(data) {
+    const presaleAddresses = new Set(data.presales.map(p => p.pairAddress));
+
+    const filteredPoolsByToken0Volume = data.poolsByToken0Volume.filter(pool => 
+        presaleAddresses.has(pool.id)
+    );
+
+    const filteredPoolsByToken1Volume = data.poolsByToken1Volume.filter(pool => 
+        presaleAddresses.has(pool.id)
+    );
+
+    return {
+        poolsByToken0Volume: filteredPoolsByToken0Volume,
+        poolsByToken1Volume: filteredPoolsByToken1Volume,
+        presales: data.presales
+    };
+  };
+
+  function findAllTVLTokensSorted(data, tokenSymbol = "WPEPU") {
+    let tvlTokens = [];
+    let seenIds = new Set();
+
+    // Iterate through both pools lists
+    const poolLists = [data.poolsByToken0Volume, data.poolsByToken1Volume];
+
+    for (const poolList of poolLists) {
+        for (const pool of poolList) {
+            // Check both token0 and token1
+            for (const tokenKey of ["token0", "token1"]) {
+                const token = pool[tokenKey];
+                const tvlKey = tokenKey === "token0" ? "totalValueLockedToken0" : "totalValueLockedToken1";
+
+                if (token.symbol === tokenSymbol) {
+                    const tvl = parseFloat(pool[tvlKey]);
+
+                    // Avoid duplicates by checking pool ID
+                    if (!seenIds.has(pool.id)) {
+                        tvlTokens.push({
+                            id: pool.id,
+                            token0: pool.token0,  // Full token0 data
+                            token1: pool.token1,  // Full token1 data
+                            totalValueLockedToken0: pool.totalValueLockedToken0,
+                            totalValueLockedToken1: pool.totalValueLockedToken1,
+                            totalValueLocked: tvl,  // Store TVL for sorting
+                            volumeToken0: pool.volumeToken0,
+                            volumeToken1: pool.volumeToken1
+                        });
+                        seenIds.add(pool.id);
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort by totalValueLocked in descending order (highest to lowest)
+    return tvlTokens.sort((a, b) => b.totalValueLocked - a.totalValueLocked);
+  };
+
+  // When we have highestPriceTokensOut, fetch presale data for them
+  const fetchPresales = async (tokenObjects: any) => {
+    const tokenIds = tokenObjects.map((token) => {
+      if (token.token0.symbol === "WPEPU") {
+        return token.token1.id;
+      } else {
+        return token.token0.id;
       }
     });
 
-    const presales = sumSwapsByToken(uniqueSwaps, withVolumeInWpepu);
-    setData(presales);
+    const query = `
+      query GetTokensData {
+        presales(where: { token_in: [${tokenIds.map(id => `"${id}"`).join(",")}] }) {
+          id
+          data
+          name
+          symbol
+          token
+        }
+      }
+    `;
+
+    const tokensDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    // Every token tokenDataJson.data.presales have data atribute that needs to be JSON.parse
+    tokensDataJson.data.presales.forEach((presale) => {
+      presale.data = JSON.parse(presale.data);
+    });
+
+    return tokensDataJson.data.presales;
   };
 
   return (
@@ -160,52 +254,71 @@ const Stats24H = () => {
           </tr>
         </thead>
         <tbody>
-          {!sortedPresalesTable?.length ? (
+          {!highestPriceTokensOut?.length ? (
             <TableBodyRow style={{ height: "56px"}} />
           ) : 
           (
-            sortedPresalesTable?.map((item) => {
-              /* const amount0IsNative = checkIsNative(
-                list.chainId,
-                item.pool.token0.id
-              );
-              const isSell = amount0IsNative
-                ? item.amount0 < 0
-                : item.amount1 < 0; */
+            highestPriceTokensOut?.map((item) => {
               return (
-                <TableBodyRow key={item.tokenInfo.id} onClick={() => window.location.href=`/${item.tokenInfo.token}`}>
+                <TableBodyRow key={item.id} onClick={() => window.location.href=`/${item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id}`}>
                     <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                      <StyledImage src={item?.tokenInfo?.data?.iconUrl} />
-                      <p style={{ paddingLeft: "10px" }}>{item.tokenInfo.name}</p>
+                      <StyledImage src={item?.iconUrl} />
+                      <p style={{ paddingLeft: "10px" }}>{
+                        item.token0.symbol != "WPEPU" ? item.token0.name : item.token1.name
+                      }</p>
                     </TableBody>
                     <TableBody width={23}>
-                      ${commaizeNumber(
-                        formatDecimals(
-                          Math.abs(item.marketCap),
-                          2
-                        )
+                      {item.marketCap && (
+                        <>
+                          ${commaizeNumber(
+                            formatDecimals(
+                              Math.abs(item.totalValueLocked * dexPrice),
+                              2
+                            )
+                          )}
+                        </>
+                      )}
+                      {(!item.hasOwnProperty("marketCap")) && (
+                        <LoadingLottie width={18} />
                       )}
                     </TableBody>
+
                     <TableBody width={23}>
-                      ${commaizeNumber(
-                        formatDecimals(
-                          Math.abs(item.volume * item.priceInUSD),
-                          2
-                        )
+                      {item.volume && (
+                        <>
+                          ${commaizeNumber(
+                            formatDecimals(
+                              Math.abs(item.volume),
+                              2
+                            )
+                          )}
+                        </>
+                      )}
+                      {(!item.hasOwnProperty("volume")) && (
+                        <LoadingLottie width={18} />
                       )}
                     </TableBody>
+
                     <TableBody width={23}>
-                      {commaizeNumber(
-                        formatDecimals(
-                          Math.abs(item.xChange),
-                          2
-                        )
-                      )}x
+                      {item.xChange && (
+                        <>
+                          {commaizeNumber(
+                            formatDecimals(
+                              (item.xChange/100),
+                              2
+                            )
+                          )}x
+                        </>
+                      )}
+                      {(!item.hasOwnProperty("xChange")) && (
+                        <LoadingLottie width={18} />
+                      )}
                     </TableBody>
+
                     <TableBody width={8}>
                       <a
                         href={`/${
-                          item.tokenInfo.token
+                          item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id
                         }`}
                         rel="noreferrer"
                       >
@@ -223,21 +336,6 @@ const Stats24H = () => {
         </tbody>
       </table>
       <Spacing height={8} />
-      {/* <Flex.Center>
-        <LeftButton
-          onClick={() => page > 1 && setPage((prev) => prev - 1)}
-          width={18}
-          color={page > 1 ? colors.white : colors.gray600}
-        />
-        <Text size="base" color={colors.white} center style={{ width: "50px" }}>
-          {page}
-        </Text>
-        <RightButton
-          onClick={() => history.hasNext && setPage((prev) => prev + 1)}
-          width={18}
-          color={history.hasNext ? colors.white : colors.gray600}
-        />
-      </Flex.Center> */}
     </div>
   );
 }
@@ -278,27 +376,6 @@ const RightButton = styled(ChevronRightIcon)`
   cursor: pointer;
   ${pressableStyle.opacity()}
 `;
-
-function getTimeLabel(timestamp: number) {
-  const time = new Date(timestamp * 1000);
-  const now = new Date();
-
-  const days = Math.abs(Math.floor(differenceInDays(now, time)));
-  const hours = Math.abs(Math.floor(differenceInHours(now, time))) % 24;
-  const minutes = Math.abs(Math.floor(differenceInMinutes(now, time))) % 60;
-  const seconds = Math.abs(Math.floor(differenceInSeconds(now, time))) % 60;
-
-  if (days > 0) {
-    return `${days}d ${hours}h ago`;
-  }
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ago`;
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s ago`;
-  }
-  return `${seconds}s ago`;
-}
 
 const StyledImage = styled.img`
   width: 32px;

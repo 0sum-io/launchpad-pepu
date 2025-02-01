@@ -1,15 +1,13 @@
 import { Flex, inDesktop, Spacing } from "@boxfoxs/bds-web";
-import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
-import { formatDecimals } from "utils/format";
 import { ConnectButton } from "components/Button";
 import { useRouter } from "next/router";
 import { useCheckIsMobile } from "@boxfoxs/bds-web";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
 import dynamic from 'next/dynamic';
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
-import { formatUnits } from "@ethersproject/units";
+import MarketCap from "../../detail/components/summary/MarketCap";
 
 const WalletControlLazy = dynamic(() => import('../../../../../components/header/WalletControl'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
@@ -17,13 +15,14 @@ const WalletControlLazy = dynamic(() => import('../../../../../components/header
 
 const FeaturedSection = () => {
   const [data, setFeaturedData] = useState(undefined);
+  const [dexPrice, setDexPrice] = useState(0);
+  const [highestValueToken, setHighestValueToken] = useState(null);
 
   const router = useRouter();
   const isMobile = useCheckIsMobile();
   const form = useCreatePresaleState();
 
-  const [dexPrice, setDexPrice] = useState(0);
-
+  // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
@@ -32,6 +31,7 @@ const FeaturedSection = () => {
     fetchDexPrice();
   }, []);
 
+  // Fetch highest price pool
   useEffect(() => {
 
     if (dexPrice === 0) return;
@@ -49,22 +49,42 @@ const FeaturedSection = () => {
   const fetchPoolWithHighestPrice = async () => {
     const query = `
         query GetHighestPriceToken {
-          pools(orderBy: token0Price, orderDirection: desc) {
+          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc) {
             id
-            volumeToken0
-            volumeToken1
-            token0Price
-            token1Price
+            totalValueLockedToken0
+            totalValueLockedToken1
             token1 {
-              id
               name
               symbol
+              id
             }
             token0 {
-              id
               name
               symbol
+              id
             }
+            volumeToken0
+            volumeToken1
+          }
+          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc) {
+            id
+            totalValueLockedToken0
+            totalValueLockedToken1
+            token1 {
+              name
+              symbol
+              id
+            }
+            token0 {
+              name
+              symbol
+              id
+            }
+            volumeToken0
+            volumeToken1
+          }
+          presales(where : { isEnd: false }) {
+            pairAddress
           }
         }
     `;
@@ -77,29 +97,23 @@ const FeaturedSection = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    // Find the first record where token0 is not "WPEPU"
-    const highestValueToken = highestPriceTokenJson.data.pools.find(pool => pool.token0.symbol !== "WPEPU");
+    // Now remove every ended presale from the list
+    const filteredData = filterPoolsByPresales(highestPriceTokenJson.data);
+    // console.log("filteredData >>>>>>>>", filteredData);
 
-    // Calculate the price of token0 in WPEPU/token0 and with 18 decimals
-    highestValueToken['price'] = formatUnits(parseInt(highestValueToken.token0Price), 18);
-    // Calculate the price in USD
-    highestValueToken['priceInUSD'] = highestValueToken['price'] * dexPrice;
-    // Calculate current market cap (supply is 1B)
-    highestValueToken['marketCap'] = 1000000000 * highestValueToken['priceInUSD'];
-    // Calculate percentage change (current market cap / initial market cap * 100)
-    highestValueToken['percentageChange'] = ((1000000000 * highestValueToken['priceInUSD']) / 1200) * 100;
-
-    // console.log("highestPriceTokenJson ----> ", highestValueToken);
+    // Now find the highest volume token from filtered data
+    const highestTVLToken = findHighestTVLToken(filteredData);
+    // console.log("highestTVLToken >>>>>>>>", highestTVLToken);
 
     // We need iconUrl and description from presale data
-    fetchPresale(highestValueToken);
+    fetchPresale(highestTVLToken);
   };
 
   // fetch one presale data from graphql
   const fetchPresale = async (tokenObject: any) => {
       const query = `
         query GetTokenData {
-          presales(where: { id: "${tokenObject.id}" }) {
+          presales(where: { id: "${tokenObject.id}", isEnd: false }) {
             id
             data
             name
@@ -126,25 +140,91 @@ const FeaturedSection = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    // console.log("tokenDataJson ----> ", tokenDataJson);
+    // Initialize TVL variable
+    let tvlInWPEPU = null;
+
+    // Find TVL in wpepu for token inside tokenObject and set it inside tokenDataJson.data.presales[0]
+    // Check which token corresponds to WPEPU and extract its TVL
+    if (tokenObject?.token0?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenObject.totalValueLockedToken0;
+    } else if (tokenObject?.token1?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenObject.totalValueLockedToken1;
+    }
+
+    // Ensure presales array exists in data and set TVL
+    if (tokenDataJson?.data?.presales && tokenDataJson.data.presales.length > 0) {
+      tokenDataJson.data.presales[0]['tvlInWPEPU'] = tvlInWPEPU;
+    }
+
     // Parse the data and set the featured data
     tokenDataJson.data.presales[0].data = JSON.parse(tokenDataJson.data.presales[0].data);
+    setHighestValueToken(tokenDataJson.data.presales[0]);
 
     setFeaturedData({
-      id: tokenObject.token0.id,
-      name: tokenObject.token0.name,
-      symbol: tokenObject.token0.symbol,
-      marketCap: tokenObject.marketCap,
-      initial_wpepu_price: 0.0001,
-      initial_market_cap: 1200,
-      priceInWpepu: tokenObject.price,
-      priceInUSD: tokenObject.priceInUSD,
-      percentageChange: tokenObject.percentageChange,
+      id: tokenDataJson.data.presales[0].token,
+      name: tokenDataJson.data.presales[0].name,
+      symbol: tokenDataJson.data.presales[0].symbol,
       data: {
         iconUrl: tokenDataJson?.data?.presales[0].data?.iconUrl,
         description: tokenDataJson?.data?.presales[0].data?.description,
       },
     });
+  };
+
+  function filterPoolsByPresales(data) {
+    const presaleAddresses = new Set(data.presales.map(p => p.pairAddress));
+
+    const filteredPoolsByToken0Volume = data.poolsByToken0Volume.filter(pool => 
+        presaleAddresses.has(pool.id)
+    );
+
+    const filteredPoolsByToken1Volume = data.poolsByToken1Volume.filter(pool => 
+        presaleAddresses.has(pool.id)
+    );
+
+    return {
+        poolsByToken0Volume: filteredPoolsByToken0Volume,
+        poolsByToken1Volume: filteredPoolsByToken1Volume,
+        presales: data.presales
+    };
+  };
+
+  function findHighestTVLToken(data, tokenSymbol = "WPEPU") {
+    let highestTVLToken = null;
+    let highestTVL = 0;
+    let seenIds = new Set();
+
+    // Iterate through both pools lists
+    const poolLists = [data.poolsByToken0Volume, data.poolsByToken1Volume];
+
+    for (const poolList of poolLists) {
+        for (const pool of poolList) {
+            // Check both token0 and token1
+            for (const tokenKey of ["token0", "token1"]) {
+                const token = pool[tokenKey];
+                const tvlKey = tokenKey === "token0" ? "totalValueLockedToken0" : "totalValueLockedToken1";
+
+                if (token.symbol === tokenSymbol) {
+                    const tvl = parseFloat(pool[tvlKey]);
+
+                    // Ensure the pool ID is unique and has the highest TVL
+                    if (tvl > highestTVL && !seenIds.has(pool.id)) {
+                        highestTVL = tvl;
+                        highestTVLToken = {
+                            id: pool.id,
+                            token0: pool.token0,  // Full token0 data
+                            token1: pool.token1,  // Full token1 data
+                            totalValueLockedToken0: pool.totalValueLockedToken0,
+                            totalValueLockedToken1: pool.totalValueLockedToken1
+                        };
+                        seenIds.add(pool.id); // Avoid duplicate results
+                    }
+                }
+            }
+        }
+    }
+
+    return highestTVLToken;
   };
 
   return (
@@ -171,31 +251,11 @@ const FeaturedSection = () => {
                     </Title>
                     <Spacing height={12} />
 
-                    <SubContainer style={{ height: isMobile ? "25px" : "50px" }}>
-                      <Amount>
-                        ${`${commaizeNumber(
-                          formatDecimals(data.marketCap, 2)
-                          )
-                        }`}
-                      </Amount>
-                      {
-                        isMobile && (
-                          <Content style={{ paddingLeft: '10px', color: '#FFF' }}> MC </Content>
-                        )
-                      }
-                      {
-                        !isMobile && (
-                          <Content style={{ paddingLeft: '10px', color: '#FFF' }}> MARKET CAP </Content>
-                        )
-                      }
-                    </SubContainer>
-
-                    <Content style={{ color: '#2eb335', fontWeight: '700', height: '30px' }}>
-                      +{`${commaizeNumber(
-                        formatDecimals(data.percentageChange, 2)
-                        )
-                      }`}%
-                    </Content>
+                    {
+                      highestValueToken && (
+                        <MarketCap presale={highestValueToken} />
+                      )
+                    }
                     <LiveNowContainer>
                       <div className="live-dot"></div>
                       <span style={{ paddingTop: '2px' }}>LIVE NOW</span>
@@ -245,13 +305,6 @@ const Container = styled.div`
   `)}
 `;
 
-const SubContainer = styled.div`
-  display: flex;
-  align-items: baseline;
-  font-weight: 700;
-  // -webkit-text-stroke: 1px black;
-`;
-
 const Featured = styled.div`
   color: #fff;
   font-size: 24px;
@@ -297,14 +350,6 @@ const Content = styled.div`
     font-size: 16px;
     height: 60px;
     -webkit-line-clamp: 3;
-  `)}
-`;
-
-const Amount = styled.div`
-  color: #fff;
-  font-size: 17px;
-  ${inDesktop(`
-    font-size: 44px;
   `)}
 `;
 
