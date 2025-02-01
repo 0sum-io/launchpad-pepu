@@ -37,7 +37,7 @@ export function InfoSection({ presale }: Props) {
           {presale.data.xUrl ? (
             <a href={presale.data.xUrl} target="_blank" rel="noreferrer">
               <Badge color={colors.gray300} style={{ padding: "6px 8px" }}>
-                <img src="/images/ic_x_white.png" width={14} /> Twitter
+                <img src="/images/ic_x_white.png" width={14} alt="" /> Twitter
               </Badge>
             </a>
           ) : null}
@@ -47,7 +47,7 @@ export function InfoSection({ presale }: Props) {
                 color={colors.gray300}
                 style={{ padding: "6px 8px 6px 6px" }}
               >
-                <img src="/images/ic_telegram.png" width={16} /> Telegram
+                <img src="/images/ic_telegram.png" width={16} alt=""/> Telegram
               </Badge>
             </a>
           ) : null}
@@ -57,7 +57,7 @@ export function InfoSection({ presale }: Props) {
                 color={colors.gray300}
                 style={{ padding: "6px 8px 6px 6px" }}
               >
-                <img src="/images/Ic_discord_color.png" width={16} /> Discord
+                <img src="/images/Ic_discord_color.png" width={16} alt=""/> Discord
               </Badge>
             </a>
           ) : null}

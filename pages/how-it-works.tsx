@@ -1,0 +1,1 @@
+export { default } from "containers/launchpad/pages/how-it-works";
