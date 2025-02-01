@@ -7,7 +7,6 @@ import { useCheckIsMobile } from "@boxfoxs/bds-web";
 import { useCreatePresaleState } from "../../create/hooks/useCreateStore";
 import dynamic from 'next/dynamic';
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
-import { formatUnits } from "@ethersproject/units";
 import MarketCap from "../../detail/components/summary/MarketCap";
 
 const WalletControlLazy = dynamic(() => import('../../../../../components/header/WalletControl'), {
@@ -16,29 +15,23 @@ const WalletControlLazy = dynamic(() => import('../../../../../components/header
 
 const FeaturedSection = () => {
   const [data, setFeaturedData] = useState(undefined);
-  const [initialMC, setInitialMarketCap] = useState(0);
+  const [dexPrice, setDexPrice] = useState(0);
+  const [highestValueToken, setHighestValueToken] = useState(null);
 
   const router = useRouter();
   const isMobile = useCheckIsMobile();
   const form = useCreatePresaleState();
-
-  const [dexPrice, setDexPrice] = useState(0);
-  const [highestValueToken, setHighestValueToken] = useState(null);
 
   // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
       setDexPrice(parseFloat(price));
-
-      // Now we can calculate inital market cap
-      // PEPU price * token worth in PEPU * total supply
-      const initialMarketCap = parseFloat(price) * 0.001263 * 1000000000;
-      setInitialMarketCap(initialMarketCap);
     };
     fetchDexPrice();
   }, []);
 
+  // Fetch highest price pool
   useEffect(() => {
 
     if (dexPrice === 0) return;
@@ -147,21 +140,30 @@ const FeaturedSection = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
+    // Initialize TVL variable
+    let tvlInWPEPU = null;
+
+    // Find TVL in wpepu for token inside tokenObject and set it inside tokenDataJson.data.presales[0]
+    // Check which token corresponds to WPEPU and extract its TVL
+    if (tokenObject?.token0?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenObject.totalValueLockedToken0;
+    } else if (tokenObject?.token1?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenObject.totalValueLockedToken1;
+    }
+
+    // Ensure presales array exists in data and set TVL
+    if (tokenDataJson?.data?.presales && tokenDataJson.data.presales.length > 0) {
+      tokenDataJson.data.presales[0]['tvlInWPEPU'] = tvlInWPEPU;
+    }
+
     // Parse the data and set the featured data
     tokenDataJson.data.presales[0].data = JSON.parse(tokenDataJson.data.presales[0].data);
     setHighestValueToken(tokenDataJson.data.presales[0]);
-    // console.log("tokenDataJson >>>>>>>>", tokenDataJson);
 
     setFeaturedData({
       id: tokenDataJson.data.presales[0].token,
       name: tokenDataJson.data.presales[0].name,
       symbol: tokenDataJson.data.presales[0].symbol,
-      initial_market_cap: initialMC,
-      marketCap: tokenObject.marketCap,
-      initial_wpepu_price: 0.001263,
-      priceInWpepu: tokenObject.price,
-      priceInUSD: tokenObject.priceInUSD,
-      percentageChange: tokenObject.percentageChange,
       data: {
         iconUrl: tokenDataJson?.data?.presales[0].data?.iconUrl,
         description: tokenDataJson?.data?.presales[0].data?.description,

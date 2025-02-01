@@ -7,24 +7,14 @@ import {
 import { formatDecimals } from "utils/format";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { useEffect, useState } from "react";
-import { useQuoterContract } from "contracts/evm/contract/UniswapV3SwapQuoterContract";
-import { formatUnits } from "@ethersproject/units";
-import { useBondingCurveProgress } from "containers/launchpad/hooks/useBondingCurveProgress";
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
 
 const MarketCap = ({ presale }: { presale: ParsedPresale }) => {
+  // console.log("Best Preforming Presale Token: ", presale);
   const presaleData = usePresaleByRPC(presale.token);
-  const progress = useBondingCurveProgress(presale);
   const isMobile = useCheckIsMobile();
 
-  // Quoter params
-  const quoterContract = useQuoterContract();
-  const tokenIn = process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY;
-  const [tokenOut, setTokenOut] = useState<string | null>(null);
-  const amount = 1;
-
   // Quote for token and real market cap
-  const [quote, setQuote] = useState<number | null>(null);
   const [marketCap, setMarketCap] = useState<number | null>(null);
   const [dexPrice, setDexPrice] = useState(0);
 
@@ -40,54 +30,26 @@ const MarketCap = ({ presale }: { presale: ParsedPresale }) => {
     fetchDexPrice();
   }, []);
 
-  // Update tokenOut once presaleData is loaded
+  // Calculate market cap after knowing TVL and PEPU price
   useEffect(() => {
-    if (presaleData && progress) {
-      setTokenOut(presaleData.token);
-    }
-  }, [presaleData, progress]);
-
-  // When we have tokenOut, fetch quote
-  useEffect(() => {
-    if (tokenOut) {
-      // It's reversed input and output because we want to know how much PEPU we get for 1 token
-      quoterContract.quoteExactInputSingle(tokenOut, tokenIn, amount, 0)
-        .then(quote => {
-            console.log('quoteExactInputSingle >>>>>', formatUnits(quote, 18));
-
-            // Quote from BN string to number, have 18 decimals
-            const quoteNumber = Number(formatUnits(quote, 18));
-            console.log('quoteNumber >>>>>', quoteNumber);
-
-            setQuote(quoteNumber);
-        })
-        .catch(error => {
-            console.error("Error fetching quote:", error);
-        });
-    }
-  }, [tokenOut]);
-
-  // Calculate market cap after quote is fetched
-  useEffect(() => {
-    if (quote && dexPrice) {
-      // Market cap is quote * dexPrice * total supply of token
-      const marketCap = quote * dexPrice * 1000000000;
+    if (dexPrice) {
+      // Market cap is presale['tvlInWPEPU'] * dexPrice
+      const marketCap = presale['tvlInWPEPU'] * dexPrice;
       setMarketCap(marketCap);
     }
-  }, [quote, dexPrice]);
+  }, [dexPrice]);
 
   // Calculate initial market cap and token performance
   useEffect(() => {
-    if (quote && dexPrice) {
-      // Initial Market cap is initial quote * dexPrice * total supply of token
-      const initialQuote = 0.001263;
-      const initialMarketCap = initialQuote * dexPrice * 1000000000;
+    if (dexPrice) {
+      // Initial Market cap is initial quote * dexPrice
+      const initialMarketCap = 50 * dexPrice;
 
       // Token performance is market cap / initial market cap * 100
       const tokenPerformance = (marketCap / initialMarketCap) * 100;
       setTokenPerformance(tokenPerformance);
     }
-  }, [quote, dexPrice, marketCap]);
+  }, [dexPrice, marketCap]);
 
   if (presaleData) {
     return (

@@ -18,26 +18,15 @@ import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
   let [dexPrice, setDexPrice] = useState(0);
-  const [initialMC, setInitialMarketCap] = useState(0);
 
   // Quoter params
-  const quoterContract = useQuoterContract();
-  const tokenIn = process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY;
   const [highestPriceTokensOut, setHighestPriceTokensOut] = useState([]);
-  const amount = 1;
 
   // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
       setDexPrice(parseFloat(price));
-
-      // Now we can calculate inital market cap
-      // PEPU price * token worth in PEPU * total supply
-      const initialMarketCap = parseFloat(price) * 0.001263 * 1000000000;
-      // console.log('initialMarketCap >>>>>', initialMarketCap);
-
-      setInitialMarketCap(initialMarketCap);
     };
     fetchDexPrice();
   }, []);
@@ -124,85 +113,37 @@ const Stats24H = () => {
       if (tokenData) {
         token['iconUrl'] = tokenData.data.iconUrl;
         token['description'] = tokenData.data.description;
+
+        // Set initial market cap that is totalValueLocked * dexPrice
+        token['initialMarketCap'] = 50 * dexPrice;
+        token['marketCap'] = token.totalValueLocked * dexPrice;
       }
     }
 
+    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
+    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
+    for (let token of highestTVLTokens) {
+      if (token.token0.symbol === "WPEPU") {
+        token['volume'] = parseFloat(token.volumeToken0) * dexPrice;
+        if (token.totalValueLocked === 0) {
+          token['xChange'] = 0;
+        } else {
+          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
+        }
+      } else {
+        token['volume'] = parseFloat(token.volumeToken1) * dexPrice;
+        if (token.totalValueLocked === 0) {
+          token['xChange'] = 0;
+        } else {
+          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
+        }
+      }
+    }
+
+    // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
     setHighestPriceTokensOut(highestTVLTokens);
     // We need iconUrl and description from presale data
   };
-
-  // When we have highestPriceTokensOut, fetch quotes for them
-  useEffect(() => {
-    if (highestPriceTokensOut) {
-      for (let token of highestPriceTokensOut) {
-        if (token.totalValueLocked > 0) {
-          // Check which token is not PEPU
-          const tokenOut = token.token0.symbol != "WPEPU" ? token.token0.id : token.token1.id;
-          const tokenPepuVolume = token.token0.symbol === "WPEPU" ? token.volumeToken0 : token.volumeToken1;
-  
-          // It's reversed input and output because we want to know how much PEPU we get for 1 token
-          quoterContract.quoteExactInputSingle(tokenOut, tokenIn, amount, 0)
-            .then(quote => {
-                // Quote from BN string to number, have 18 decimals
-                const quoteNumber = Number(formatUnits(quote, 18));
-
-                // Calculate market cap for token
-                token['initialMarketCap'] = initialMC;
-                token['marketCap'] = dexPrice * quoteNumber * 1000000000;
-                token['volume'] = tokenPepuVolume * dexPrice;
-                token['xChange'] = ((dexPrice * quoteNumber * 1000000000) - initialMC) / initialMC * 100;
-            })
-            .catch(error => {
-                console.error("Error fetching quote:", error);
-            });
-        } else {
-          //console.log("Total value locked is 0 for token: ", token);
-          // Set all data to 0
-          token['marketCap'] = 0;
-          token['volume'] = 0;
-          token['xChange'] = 0;
-        }
-      }
-    }
-  }, [highestPriceTokensOut, dexPrice, initialMC]);
-
-  // When we have highestPriceTokensOut, fetch presale data for them
-  const fetchPresales = async (tokenObjects: any) => {
-    const tokenIds = tokenObjects.map((token) => {
-      if (token.token0.symbol === "WPEPU") {
-        return token.token1.id;
-      } else {
-        return token.token0.id;
-      }
-    });
-
-    const query = `
-      query GetTokensData {
-        presales(where: { token_in: [${tokenIds.map(id => `"${id}"`).join(",")}] }) {
-          id
-          data
-          name
-          symbol
-          token
-        }
-      }
-    `;
-
-    const tokensDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    }).then((res) => res.json());
-
-    // Every token tokenDataJson.data.presales have data atribute that needs to be JSON.parse
-    tokensDataJson.data.presales.forEach((presale) => {
-      presale.data = JSON.parse(presale.data);
-    });
-
-    return tokensDataJson.data.presales;
-};
 
   function filterPoolsByPresales(data) {
     const presaleAddresses = new Set(data.presales.map(p => p.pairAddress));
@@ -262,6 +203,44 @@ const Stats24H = () => {
     return tvlTokens.sort((a, b) => b.totalValueLocked - a.totalValueLocked);
   };
 
+  // When we have highestPriceTokensOut, fetch presale data for them
+  const fetchPresales = async (tokenObjects: any) => {
+    const tokenIds = tokenObjects.map((token) => {
+      if (token.token0.symbol === "WPEPU") {
+        return token.token1.id;
+      } else {
+        return token.token0.id;
+      }
+    });
+
+    const query = `
+      query GetTokensData {
+        presales(where: { token_in: [${tokenIds.map(id => `"${id}"`).join(",")}] }) {
+          id
+          data
+          name
+          symbol
+          token
+        }
+      }
+    `;
+
+    const tokensDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    // Every token tokenDataJson.data.presales have data atribute that needs to be JSON.parse
+    tokensDataJson.data.presales.forEach((presale) => {
+      presale.data = JSON.parse(presale.data);
+    });
+
+    return tokensDataJson.data.presales;
+  };
+
   return (
     <div>
       <table style={{ width: "100%", minWidth: "748px", borderSpacing: 0 }}>
@@ -293,7 +272,7 @@ const Stats24H = () => {
                         <>
                           ${commaizeNumber(
                             formatDecimals(
-                              Math.abs(item.marketCap),
+                              Math.abs(item.totalValueLocked * dexPrice),
                               2
                             )
                           )}
