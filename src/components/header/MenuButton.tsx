@@ -94,7 +94,7 @@ const MenuButton = styled(Flex.Center)<{ active: boolean }>`
 `;
 
 const MENU_ITEMS = [
-  { label: "How It Works", path: process.env.NEXT_PUBLIC_HOW_IT_WORKS },
+  { label: "How It Works", path: "/how-it-works" },
   { label: "Swap", path: process.env.NEXT_PUBLIC_DEX_URL },
   { label: "X", path: "https://x.com/pepe_unchained" },
   { label: "Telegram", path: "https://t.me/pepeunchained" },
