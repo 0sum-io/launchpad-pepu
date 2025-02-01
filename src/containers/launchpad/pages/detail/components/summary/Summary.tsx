@@ -17,6 +17,8 @@ import {
 } from "containers/launchpad/hooks/useBondingCurveProgress";
 import { PercentageBadge } from "containers/launchpad/pages/list/components";
 import { useProvider, useTokenInfo } from "hooks/on-chain";
+import { fetchQuote } from "hooks/on-chain/useDexPrice";
+import { useEffect, useState } from "react";
 import { ParsedPresale } from "remotes/graphql/launchpad/chain";
 import { getClearedSymbol } from "utils/checkIsNative";
 import { formatDecimals, shortenAddress } from "utils/format";
@@ -30,7 +32,84 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
-  const paymentToken = useTokenInfo(presale.chainId, presale.paymentToken);
+  const [dexPrice, setDexPrice] = useState(0);
+  const [tokenMarketCap, setTokenMarketCap] = useState(0);
+
+  // Check PEPU price and query token data
+  useEffect(() => {
+    const fetchDexPrice = async () => {
+      const price = await fetchQuote();
+      setDexPrice(parseFloat(price));
+    };
+    fetchDexPrice();
+  }, []);
+
+  // Check PEPU price and query token data
+  useEffect(() => {
+    if (!dexPrice) return;
+    fetchPresale(presale)
+
+    // We are setting fetch for presale list here
+    const interval = setInterval(() => {
+      fetchPresale(presale)
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [dexPrice]);
+
+  // fetch one presale data from graphql
+  const fetchPresale = async (presale: any) => {
+    const query = `
+      query GetTokenData {
+        pools(where: { id: "${presale.pairAddress.toLowerCase()}" }) {
+          id
+          token0Price
+          token1Price
+          totalValueLockedToken0
+          totalValueLockedToken1
+          token1 {
+            name
+            symbol
+            id
+            volume
+          }
+          token0 {
+            name
+            symbol
+            id
+            volume
+          }
+        }
+      }
+    `;
+
+    const tokenDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    // Initialize TVL variable
+    let tvlInWPEPU = null;
+
+    // Check which token corresponds to WPEPU and extract its TVL
+    if (tokenDataJson.data.pools[0].token0?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenDataJson.data.pools[0].totalValueLockedToken0;
+    } else if (tokenDataJson.data.pools[0].token1?.symbol == "WPEPU") {
+      tvlInWPEPU = tokenDataJson.data.pools[0].totalValueLockedToken1;
+    }
+
+    // Ensure pools array exists in data and set TVL
+    if (tokenDataJson?.data?.pools && tokenDataJson.data.pools.length > 0) {
+      tokenDataJson.data.pools[0]['tvlInWPEPU'] = parseFloat(tvlInWPEPU);
+
+      // Set Token Marketcap
+      tokenDataJson.data.pools[0]['tokenMarketCap'] = parseFloat(tokenDataJson.data.pools[0].tvlInWPEPU) * dexPrice;
+      setTokenMarketCap(tokenDataJson.data.pools[0].tokenMarketCap);
+    }
+  };
 
   return (
     <Container>
@@ -100,6 +179,13 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
             {shortenAddress(presale.pairAddress, 4)}
           </a>
         </Link>
+      </Flex.CenterVertical>
+      <Spacing height={8} />
+      <Flex.CenterVertical justify="space-between">
+        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 400 }}>
+          Market Cap
+        </Info>
+        <span style={{ fontSize: "15px", fontWeight: "700", color: "#2fb335" }}>${commaizeNumber(formatDecimals(tokenMarketCap || 0, 2))}</span>
       </Flex.CenterVertical>
     </Container>
   );
