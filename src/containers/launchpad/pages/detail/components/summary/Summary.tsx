@@ -32,6 +32,7 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
+  console.log("progress", progress);
   const [dexPrice, setDexPrice] = useState(0);
   const [tokenMarketCap, setTokenMarketCap] = useState(0);
 
@@ -180,13 +181,18 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
           </a>
         </Link>
       </Flex.CenterVertical>
-      <Spacing height={8} />
-      <Flex.CenterVertical justify="space-between">
-        <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 400 }}>
-          Market Cap
-        </Info>
-        <span style={{ fontSize: "15px", fontWeight: "700", color: "#2fb335" }}>${commaizeNumber(formatDecimals(tokenMarketCap || 0, 2))}</span>
-      </Flex.CenterVertical>
+      { progress.data < 100 && (
+          <>
+            <Spacing height={8} />
+            <Flex.CenterVertical justify="space-between">
+              <Info color="#fff" style={{ fontSize: isMobile ? "13px" : "15px", fontWeight: 400 }}>
+                Market Cap
+              </Info>
+              <span style={{ fontSize: "15px", fontWeight: "700", color: "#2fb335" }}>${commaizeNumber(formatDecimals(tokenMarketCap || 0, 2))}</span>
+            </Flex.CenterVertical>
+          </>
+        )
+      }
     </Container>
   );
 };
