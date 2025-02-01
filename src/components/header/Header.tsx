@@ -3,7 +3,6 @@ import styled from "@emotion/styled";
 import { Logo } from "components/Logo";
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 import { MenuControl } from "./MenuButton";
 
 export function Header() {
@@ -28,17 +27,9 @@ export function Header() {
           <Link href="/">
             <NavItem>Home</NavItem>
           </Link>
-          {process.env.NEXT_PUBLIC_HOW_IT_WORKS && (
-            <a
-              href={process.env.NEXT_PUBLIC_HOW_IT_WORKS}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <NavItem>How It Works 
-                <ArrowTopRightOnSquareIcon width={25} style={{ paddingLeft: "5px", marginBottom: "5px" }} color="#2eb335" />
-              </NavItem>
-            </a>
-          )}
+          <Link href="/how-it-works">
+            <NavItem>How It Works</NavItem>
+          </Link>
           {process.env.NEXT_PUBLIC_DEX_URL && (
             <a
               href={process.env.NEXT_PUBLIC_DEX_URL}
