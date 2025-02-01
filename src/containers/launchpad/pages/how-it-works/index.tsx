@@ -4,10 +4,16 @@ import { FadeAnimation } from "components/animation";
 import { PageContainer } from "components/PageContainer";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useEffect } from "react";
 import { hoverableStyle, pressableStyle } from "utils/style";
 
 export default function HomePage() {
   const isMobile = useCheckIsMobile();
+
+  // When user navigate here set localStorage.setItem("seen", "true");
+  useEffect(() => {
+    localStorage.setItem("seen", "true");
+  }, []);
 
   const WalletControlLazy = dynamic(
     () => import("../../../../components/header/WalletControl"),
