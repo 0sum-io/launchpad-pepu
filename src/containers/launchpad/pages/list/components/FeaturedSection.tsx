@@ -25,6 +25,7 @@ const FeaturedSection = () => {
   const [dexPrice, setDexPrice] = useState(0);
   const [highestValueToken, setHighestValueToken] = useState(null);
 
+  // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
       const price = await fetchQuote();
@@ -32,7 +33,7 @@ const FeaturedSection = () => {
 
       // Now we can calculate inital market cap
       // PEPU price * token worth in PEPU * total supply
-      const initialMarketCap = parseFloat(price) * 0.0001 * 1000000000;
+      const initialMarketCap = parseFloat(price) * 0.001263 * 1000000000;
       setInitialMarketCap(initialMarketCap);
     };
     fetchDexPrice();
@@ -157,7 +158,7 @@ const FeaturedSection = () => {
       symbol: tokenDataJson.data.presales[0].symbol,
       initial_market_cap: initialMC,
       marketCap: tokenObject.marketCap,
-      initial_wpepu_price: 0.0001,
+      initial_wpepu_price: 0.001263,
       priceInWpepu: tokenObject.price,
       priceInUSD: tokenObject.priceInUSD,
       percentageChange: tokenObject.percentageChange,

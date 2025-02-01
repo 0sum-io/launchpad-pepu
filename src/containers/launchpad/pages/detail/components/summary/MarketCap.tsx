@@ -80,7 +80,7 @@ const MarketCap = ({ presale }: { presale: ParsedPresale }) => {
   useEffect(() => {
     if (quote && dexPrice) {
       // Initial Market cap is initial quote * dexPrice * total supply of token
-      const initialQuote = 0.0001;
+      const initialQuote = 0.001263;
       const initialMarketCap = initialQuote * dexPrice * 1000000000;
 
       // Token performance is market cap / initial market cap * 100
