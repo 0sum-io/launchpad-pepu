@@ -3,8 +3,10 @@ import styled from "@emotion/styled";
 import { PageContainer } from "components/PageContainer";
 import { useSortedPresaleList } from "../../hooks/useSortedPresaleList";
 import { OrderSection, TitleSection } from "./components";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from 'next/dynamic';
+import { hoverableStyle, pressableStyle } from "utils/style";
+import Link from "next/link";
 
 const FeaturedSection = dynamic(() => import('./components/FeaturedSection'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
@@ -20,6 +22,7 @@ const MainPageStatistics = dynamic(() => import('./components/statistics/MainSta
 
 export default function HomePage() {
   const isMobile = useCheckIsMobile();
+  const [isDialogOpen, setDialogOpen] = useState(false);
   const sortedPresales = useSortedPresaleList();
   const [keyword, setKeyword] = useState("");
   const list = useMemo(
@@ -34,6 +37,14 @@ export default function HomePage() {
         : sortedPresales,
     [keyword, sortedPresales]
   );
+
+  // Check if user already seen the dialog, use local storage to store the state
+  useEffect(() => {
+    const seen = localStorage.getItem("seen");
+    if (!seen) {
+      setDialogOpen(true);
+    }
+  }, []);
 
   const scrollRef = useRef(null);
 
@@ -114,6 +125,37 @@ export default function HomePage() {
         </ContentContainer>
         <MainPageStatistics />
       </PageContainer>
+
+      {isDialogOpen && (
+        <DialogOverlay>
+          <Dialog>
+            <CloseButton onClick={() => {
+              setDialogOpen(false);
+              localStorage.setItem("seen", "true");
+            }}>&times;</CloseButton>
+
+            <Spacing height={18} />
+            <h3 style={{ fontSize: "32px", fontWeight: "700", textAlign: "center" }}>NEW TO THE PAD?</h3>
+
+            <Spacing height={18} />
+            <Content>
+              {" "}
+              We strongly suggest reading the How To Section Before you get started.{" "}
+            </Content>
+
+            <Spacing height={18} />
+            <Link href="/how-it-works">
+              <ButtonContainer>Take Me to How It Works</ButtonContainer>
+            </Link>
+
+            <Spacing height={18} />
+            <span style={{cursor: "pointer", textDecoration: "underline" }} onClick={() => {
+              setDialogOpen(false);
+              localStorage.setItem("seen", "true");
+            }}>Proceed</span>
+          </Dialog>
+        </DialogOverlay>
+      )}
     </div>
   );
 }
@@ -241,4 +283,90 @@ const ScrollButton = styled.button`
   ${inDesktop(`
     top: 50%;
   `)}
+`;
+
+const DialogOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const Dialog = styled.div`
+  background: #1e1e1e;
+  color: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  border: 2px solid #3B3B3B;
+  width: 90%;
+  max-width: 565px;
+  height: 300px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const CloseButton = styled.span`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+
+  &:hover {
+    color: #aaa;
+  }
+`;
+
+const Content = styled.div`
+  font-family: Grandstander;
+  line-height: 24px;
+  font-weight: 500;
+  font-size: 20px;
+  color: #fff;
+  height: auto;
+  text-transform: uppercase;
+`;
+
+const ButtonContainer = styled.div`
+  font-family: Grandstander;
+  font-size: 20px;
+  position: relative;
+  width: 295px;
+  text-align: center;
+  border: 2px solid #000;
+  padding: 20px;
+  border-radius: 35px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #2eb335;
+  height: max-content;
+  color: #000;
+  cursor: pointer;
+  font-weight: 700;
+
+  ${hoverableStyle.scale(1.02)}
+  ${pressableStyle.scale()}
+
+    ${inDesktop(`
+        position: relative;
+        font-size: 20px;
+        width: 295px;
+        text-align: center;
+        border: 2px solid #000;
+        padding: 20px;
+        border-radius: 35px;
+        margin-left: auto;
+        margin-right: auto;
+        height: max-content;
+        font-weight: 700;
+    `)}
 `;
