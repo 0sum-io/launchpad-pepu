@@ -68,9 +68,11 @@ const DropDownMenu = styled.div`
   align-items: center;
   position: absolute;
   top: 40px;
-  left: -340px;
-  width: 100vw;
-  height: 100vh;
+  left: -150px;
+  width: 240px;
+  height: 500px;
+  border: 1px solid #3b3b3b;
+  border-radius: 16px;
   background: #0f0f0f;
   z-index: 999;
 `;
@@ -94,6 +96,7 @@ const MenuButton = styled(Flex.Center)<{ active: boolean }>`
 `;
 
 const MENU_ITEMS = [
+  { label: "Home", path: "/" },
   { label: "How It Works", path: "/how-it-works" },
   { label: "Swap", path: process.env.NEXT_PUBLIC_DEX_URL },
   { label: "X", path: "https://x.com/pepe_unchained" },

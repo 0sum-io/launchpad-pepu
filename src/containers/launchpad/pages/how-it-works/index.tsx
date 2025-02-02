@@ -32,7 +32,7 @@ export default function HowItWorks() {
               <WalletControlLazy left="0px" />
             </WalletControlDiv>
 
-            <div style={{ flex: 1, maxWidth: "900px", margin: "0 20px 0 20px"}}>
+            <div style={{ flex: 1, maxWidth: "900px"}}>
               <MainHeader> How it works </MainHeader>
               <Spacing height={8} />
               <SubHeader> Getting Started with Pump pad </SubHeader>
@@ -40,8 +40,7 @@ export default function HowItWorks() {
               {/* STEP 1 - Add Pepe Unchained L2 Network */}
               <Spacing height={28} />
               <SubHeader> Step 1: Add Pepe Unchained L2 Network </SubHeader>
-
-              <Spacing height={14} />
+              <Spacing height={28} />
               <Content>
                 {" "}
                 Connect your wallet to the Pump Pad (link) and you will be
@@ -89,7 +88,6 @@ export default function HowItWorks() {
 
               <Spacing height={14} />
               <Content>
-                {" "}
                 Furthermore, to make transactions, stake, or withdraw from Pepe
                 Unchained Layer 2 your wallet needs support for custom networks.
                 If your wallet does not have support for custom networks, then
@@ -124,9 +122,8 @@ export default function HowItWorks() {
               <Spacing height={28} />
               <SubHeader> step 2: Bridge $PEPU to Layer 2 </SubHeader>
 
-              <Spacing height={14} />
+              <Spacing height={28} />
               <Content>
-                {" "}
                 To utilize the pump pad, you&apos;ll need to bridge your PEPU
                 tokens to Layer 2 with Pepe
                 <a
@@ -336,7 +333,6 @@ const ButtonContainer = styled.div`
   font-family: Grandstander;
   font-size: 20px;
   position: relative;
-  width: 220px;
   text-align: center;
   border: 2px solid #000;
   padding: 20px;
@@ -367,6 +363,7 @@ const ButtonContainer = styled.div`
 `;
 
 const WalletControlDiv = styled.div`
+  margin-right: 20px;
   @media (max-width: 990px) {
     display: none;
   }
