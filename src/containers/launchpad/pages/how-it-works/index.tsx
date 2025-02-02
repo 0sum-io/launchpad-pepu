@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { hoverableStyle, pressableStyle } from "utils/style";
 
-export default function HomePage() {
+export default function HowItWorks() {
   const isMobile = useCheckIsMobile();
 
   // When user navigate here set localStorage.setItem("seen", "true");
@@ -28,13 +28,11 @@ export default function HomePage() {
         <ContentContainer>
           <Spacing height={isMobile ? 25 : 35} />
           <Flex.CenterVertical align="start">
-            <div>
+            <WalletControlDiv>
               <WalletControlLazy left="0px" />
-            </div>
+            </WalletControlDiv>
 
-            <Spacing width={28} />
-
-            <div style={{ flex: 1, maxWidth: "900px" }}>
+            <div style={{ flex: 1, maxWidth: "900px", margin: "0 20px 0 20px"}}>
               <MainHeader> How it works </MainHeader>
               <Spacing height={8} />
               <SubHeader> Getting Started with Pump pad </SubHeader>
@@ -199,7 +197,7 @@ export default function HomePage() {
               </Content>
 
               <Spacing height={36} />
-              <img src="/images/step2_how_to.png" width={600} alt="" />
+              <img src="/images/step2_how_to.png" width={"70%"} alt="" />
 
               <Spacing height={14} />
               <div>
@@ -366,4 +364,10 @@ const ButtonContainer = styled.div`
         height: max-content;
         font-weight: 700;
     `)}
+`;
+
+const WalletControlDiv = styled.div`
+  @media (max-width: 990px) {
+    display: none;
+  }
 `;
