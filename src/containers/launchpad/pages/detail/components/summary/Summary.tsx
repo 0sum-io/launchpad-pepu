@@ -214,7 +214,7 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       </Text>
       <Spacing height={24} />
       <a
-        href={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?outputCurrency=${data.token}`}
+        href={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?inputCurrency=ETH&outputCurrency=${data.token}`}
         target="_blank"
         rel="noreferrer"
       >
@@ -222,7 +222,7 @@ export function DeployedDexBadge({ data }: { data: ParsedPresale }) {
       </a>
       <Spacing height={24} />
       <iframe
-        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?theme=dark&inputCurrency=${data.paymentToken}&outputCurrency=${data.id}`}
+        src={`${process.env.NEXT_PUBLIC_DEX_URL}/#/swap?theme=dark&inputCurrency=ETH&outputCurrency=${data.id}`}
         scrolling="no"
         style={{
           border: "none",
