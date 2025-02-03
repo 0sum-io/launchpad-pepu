@@ -33,6 +33,11 @@ const NewListingsTicker = () => {
         newDataSet.push(singleListing);
       }
 
+      // Leave only 20 records in newDataSet
+      if (newDataSet.length >= 20) {
+        newDataSet.length = 20;
+      }
+
       // console.log("New dataset purchases:", newDataSet); // Debugging log
       setData(newDataSet);
     };
