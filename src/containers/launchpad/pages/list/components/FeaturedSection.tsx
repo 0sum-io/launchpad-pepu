@@ -49,7 +49,9 @@ const FeaturedSection = () => {
   const fetchPoolWithHighestPrice = async () => {
     const query = `
         query GetHighestPriceToken {
-          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc) {
+          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc
+            where: { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
+          ) {
             id
             totalValueLockedToken0
             totalValueLockedToken1
@@ -66,7 +68,9 @@ const FeaturedSection = () => {
             volumeToken0
             volumeToken1
           }
-          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc) {
+          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc
+            where: { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
+          ) {
             id
             totalValueLockedToken0
             totalValueLockedToken1
@@ -97,13 +101,15 @@ const FeaturedSection = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
+    console.log("------", highestPriceTokenJson)
+
     // Now remove every ended presale from the list
     const filteredData = filterPoolsByPresales(highestPriceTokenJson.data);
     // console.log("filteredData >>>>>>>>", filteredData);
 
     // Now find the highest volume token from filtered data
     const highestTVLToken = findHighestTVLToken(filteredData);
-    // console.log("highestTVLToken >>>>>>>>", highestTVLToken);
+    console.log("highestTVLToken >>>>>>>>", highestTVLToken);
 
     // We need iconUrl and description from presale data
     fetchPresale(highestTVLToken);
