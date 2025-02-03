@@ -1,4 +1,5 @@
-import { Spacing } from "@boxfoxs/bds-web";
+import { inDesktop, Spacing } from "@boxfoxs/bds-web";
+import { isMobile } from "@boxfoxs/next";
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
 import { formatUnits } from "@ethersproject/units";
@@ -18,6 +19,8 @@ import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
   let [dexPrice, setDexPrice] = useState(0);
+  let [paginationPageNumber, setPaginationPageNumber] = useState(1);
+  let [loadingNewPage, setLoadingNewPage] = useState(true);
 
   // Quoter params
   const [highestPriceTokensOut, setHighestPriceTokensOut] = useState([]);
@@ -35,20 +38,21 @@ const Stats24H = () => {
   useEffect(() => {
     if (dexPrice === 0) return;
     fetchPoolWithHighestPrice();
-
-    // We are setting fetch for presale list here
-    /* const interval = setInterval(() => {
-      fetchPoolWithHighestPrice();
-    }, 15000);
-
-    return () => clearInterval(interval); */
   }, [dexPrice]);
+
+  // Fetch highest price pool on pagination change
+  useEffect(() => {
+    console.log("paginationPageNumber", paginationPageNumber);
+    fetchPoolWithHighestPrice();
+  }, [paginationPageNumber]);
 
   // fetch pool with highest token price in WPEPU
   const fetchPoolWithHighestPrice = async () => {
+    setLoadingNewPage(true);
+
     const query = `
         query GetHighestPriceToken {
-          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc
+          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc, first: 10, skip: ${paginationPageNumber}
             where: { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
           ) {
             id
@@ -67,7 +71,7 @@ const Stats24H = () => {
             volumeToken0
             volumeToken1
           }
-          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc
+          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc, first: 10, skip: ${paginationPageNumber}
             where: { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
           ) {
             id
@@ -86,9 +90,6 @@ const Stats24H = () => {
             volumeToken0
             volumeToken1
           }
-          presales(where : { isEnd: false }) {
-            pairAddress
-          }
         }
     `;
 
@@ -100,12 +101,8 @@ const Stats24H = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    // Now remove every ended presale from the list
-    const filteredData = filterPoolsByPresales(highestPriceTokenJson.data);
-    // console.log("filteredData 24H list >>>>>>>>", filteredData);
-
-    const highestTVLTokens = findAllTVLTokensSorted(filteredData);
-    // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
+    const highestTVLTokens = findAllTVLTokensSorted(highestPriceTokenJson.data);
+    console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
 
     // Fetch presale data for highestTVLTokens
     const tokenDatas = await fetchPresales(highestTVLTokens);
@@ -147,24 +144,6 @@ const Stats24H = () => {
     // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
     setHighestPriceTokensOut(highestTVLTokens);
     // We need iconUrl and description from presale data
-  };
-
-  function filterPoolsByPresales(data) {
-    const presaleAddresses = new Set(data.presales.map(p => p.pairAddress));
-
-    const filteredPoolsByToken0Volume = data.poolsByToken0Volume.filter(pool => 
-        presaleAddresses.has(pool.id)
-    );
-
-    const filteredPoolsByToken1Volume = data.poolsByToken1Volume.filter(pool => 
-        presaleAddresses.has(pool.id)
-    );
-
-    return {
-        poolsByToken0Volume: filteredPoolsByToken0Volume,
-        poolsByToken1Volume: filteredPoolsByToken1Volume,
-        presales: data.presales
-    };
   };
 
   function findAllTVLTokensSorted(data, tokenSymbol = "WPEPU") {
@@ -242,104 +221,158 @@ const Stats24H = () => {
       presale.data = JSON.parse(presale.data);
     });
 
+    // Loading is completed
+    setLoadingNewPage(false);
+
     return tokensDataJson.data.presales;
   };
 
   return (
     <div>
-      <table style={{ width: "100%", minWidth: "748px", borderSpacing: 0 }}>
-        <thead>
-          <tr>
-            <TableHeader> Token name </TableHeader>
-            <TableHeader> Marketcap </TableHeader>
-            <TableHeader> 24h Volume </TableHeader>
-            <TableHeader> Performance </TableHeader>
-            <TableHeader> Info </TableHeader>
-          </tr>
-        </thead>
-        <tbody>
-          {!highestPriceTokensOut?.length ? (
-            <TableBodyRow style={{ height: "56px"}} />
-          ) : 
-          (
-            highestPriceTokensOut?.map((item) => {
-              return (
-                <TableBodyRow key={item.id} onClick={() => window.location.href=`/${item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id}`}>
-                    <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                      <StyledImage src={item?.iconUrl} />
-                      <p style={{ paddingLeft: "10px" }}>{
-                        item.token0.symbol != "WPEPU" ? item.token0.name : item.token1.name
-                      }</p>
-                    </TableBody>
-                    <TableBody width={23}>
-                      {item.marketCap && (
-                        <>
-                          ${commaizeNumber(
-                            formatDecimals(
-                              Math.abs(item.totalValueLocked * dexPrice),
-                              2
-                            )
+      {
+        !loadingNewPage && (
+          <table style={{ width: "100%", minWidth: "748px", borderSpacing: 0 }}>
+            <thead>
+              <tr>
+                <TableHeader> Token name </TableHeader>
+                <TableHeader> Marketcap </TableHeader>
+                <TableHeader> 24h Volume </TableHeader>
+                <TableHeader> Performance </TableHeader>
+                <TableHeader> Info </TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {!highestPriceTokensOut?.length ? (
+                <TableBodyRow style={{ height: "56px"}} />
+              ) : 
+              (
+                highestPriceTokensOut?.map((item) => {
+                  return (
+                    <TableBodyRow key={item.id} onClick={() => window.location.href=`/${item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id}`}>
+                        <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                          <StyledImage src={item?.iconUrl} />
+                          <p style={{ paddingLeft: "10px" }}>{
+                            item.token0.symbol != "WPEPU" ? item.token0.name : item.token1.name
+                          }</p>
+                        </TableBody>
+                        <TableBody width={23}>
+                          {item.marketCap && (
+                            <>
+                              ${commaizeNumber(
+                                formatDecimals(
+                                  Math.abs(item.totalValueLocked * dexPrice),
+                                  2
+                                )
+                              )}
+                            </>
                           )}
-                        </>
-                      )}
-                      {(!item.hasOwnProperty("marketCap")) && (
-                        <LoadingLottie width={18} />
-                      )}
-                    </TableBody>
-
-                    <TableBody width={23}>
-                      {item.volume && (
-                        <>
-                          ${commaizeNumber(
-                            formatDecimals(
-                              Math.abs(item.volume),
-                              2
-                            )
+                          {(!item.hasOwnProperty("marketCap")) && (
+                            <LoadingLottie width={18} />
                           )}
-                        </>
-                      )}
-                      {(!item.hasOwnProperty("volume")) && (
-                        <LoadingLottie width={18} />
-                      )}
-                    </TableBody>
+                        </TableBody>
+    
+                        <TableBody width={23}>
+                          {item.volume && (
+                            <>
+                              ${commaizeNumber(
+                                formatDecimals(
+                                  Math.abs(item.volume),
+                                  2
+                                )
+                              )}
+                            </>
+                          )}
+                          {(!item.hasOwnProperty("volume")) && (
+                            <LoadingLottie width={18} />
+                          )}
+                        </TableBody>
+    
+                        <TableBody width={23}>
+                          {item.xChange && (
+                            <>
+                              {commaizeNumber(
+                                formatDecimals(
+                                  (item.xChange/100),
+                                  2
+                                )
+                              )}x
+                            </>
+                          )}
+                          {(!item.hasOwnProperty("xChange")) && (
+                            <LoadingLottie width={18} />
+                          )}
+                        </TableBody>
+    
+                        <TableBody width={8}>
+                          <a
+                            href={`/${
+                              item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id
+                            }`}
+                            rel="noreferrer"
+                          >
+                            <img
+                              src="/images/ic_expand_window.svg"
+                              alt="expand"
+                              width={14}
+                            />
+                          </a>
+                        </TableBody>
+                    </TableBodyRow>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        )
+      }
 
-                    <TableBody width={23}>
-                      {item.xChange && (
-                        <>
-                          {commaizeNumber(
-                            formatDecimals(
-                              (item.xChange/100),
-                              2
-                            )
-                          )}x
-                        </>
-                      )}
-                      {(!item.hasOwnProperty("xChange")) && (
-                        <LoadingLottie width={18} />
-                      )}
-                    </TableBody>
+      {
+        loadingNewPage && (
+          <>
+            <Spacing height={28} />
+            <LoadingLottie width={36} />
+            <Spacing height={28} />
+          </>
+        )
+      }
 
-                    <TableBody width={8}>
-                      <a
-                        href={`/${
-                          item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id
-                        }`}
-                        rel="noreferrer"
-                      >
-                        <img
-                          src="/images/ic_expand_window.svg"
-                          alt="expand"
-                          width={14}
-                        />
-                      </a>
-                    </TableBody>
-                </TableBodyRow>
-              );
-            })
-          )}
-        </tbody>
-      </table>
       <Spacing height={8} />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <ScrollButtonPagination onClick={() => {
+          let paginationNmbr = paginationPageNumber;
+          if (paginationNmbr > 1) {
+            paginationNmbr = paginationNmbr - 1;
+            setPaginationPageNumber(paginationNmbr)
+          }
+        }}>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "rotateY(180deg)" }}>
+            <path
+              d="M9 6l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </ScrollButtonPagination>
+
+        <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> { paginationPageNumber } </span>
+
+        <ScrollButtonPagination onClick={() => {
+            let paginationNmbr = paginationPageNumber + 1;
+            setPaginationPageNumber(paginationNmbr)
+          }}>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 6l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </ScrollButtonPagination>
+      </div>
     </div>
   );
 }
@@ -387,4 +420,39 @@ const StyledImage = styled.img`
   border-radius: 8px;
   border: 2px solid #272727;
   object-fit: cover;
+`;
+
+const ScrollButtonPagination = styled.button`
+  width: 30px;
+  height: 30px;
+  background-color: #00b300; /* Green background */
+  color: #fff; /* White arrow color */
+  border: 2px solid #000;
+  border-radius: 50%; /* Circle shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    background-color: #009900; /* Darker green on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+  }
+
+  &:active {
+    background-color: #006600; /* Even darker green on click */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Reduced shadow on click */
+  }
+
+  svg {
+    width: 44px;
+    height: 44px;
+    color: #000;
+  }
+
+  ${inDesktop(`
+    top: 50%;
+  `)}
 `;
