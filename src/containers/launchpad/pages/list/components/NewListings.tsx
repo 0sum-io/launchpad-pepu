@@ -27,10 +27,11 @@ const NewListingsTicker = () => {
           }
         });
 
-        singleListing['avatar'] = presale?.data?.iconUrl || process.env.NEXT_PUBLIC_LOGO; // Replace with actual image URL
-        singleListing['name'] = presale?.name;
-
-        newDataSet.push(singleListing);
+        if (presale?.data?.iconUrl && presale?.name) {
+          singleListing['avatar'] = presale?.data?.iconUrl || process.env.NEXT_PUBLIC_LOGO; // Replace with actual image URL
+          singleListing['name'] = presale?.name;
+          newDataSet.push(singleListing);
+        }
       }
 
       // Leave only 20 records in newDataSet
