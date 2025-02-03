@@ -65,7 +65,9 @@ export function TokenInput({ icon, symbol, balance, value, onChange }: Props) {
         <Spacing width={12} />
 
         {/* Disable on dust balance */}
-        <MaxButton onClick={() => onChange(String(formatDecimals(balance, 18)))} 
+        <MaxButton onClick={() => {
+          onChange(String(formatDecimals(Math.floor(balance), 18)))}
+        } 
           disabled={Number(commaizeNumber(formatDecimals(balance, 18))) < 0.0001}>
             MAX
         </MaxButton>
