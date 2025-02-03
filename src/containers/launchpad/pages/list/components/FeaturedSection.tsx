@@ -101,15 +101,13 @@ const FeaturedSection = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    console.log("------", highestPriceTokenJson)
-
     // Now remove every ended presale from the list
     const filteredData = filterPoolsByPresales(highestPriceTokenJson.data);
     // console.log("filteredData >>>>>>>>", filteredData);
 
     // Now find the highest volume token from filtered data
     const highestTVLToken = findHighestTVLToken(filteredData);
-    console.log("highestTVLToken >>>>>>>>", highestTVLToken);
+    // console.log("highestTVLToken >>>>>>>>", highestTVLToken);
 
     // We need iconUrl and description from presale data
     fetchPresale(highestTVLToken);
