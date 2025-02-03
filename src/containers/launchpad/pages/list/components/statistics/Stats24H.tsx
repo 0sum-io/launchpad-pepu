@@ -48,7 +48,9 @@ const Stats24H = () => {
   const fetchPoolWithHighestPrice = async () => {
     const query = `
         query GetHighestPriceToken {
-          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc) {
+          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc
+            where: { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
+          ) {
             id
             totalValueLockedToken0
             totalValueLockedToken1
@@ -65,7 +67,9 @@ const Stats24H = () => {
             volumeToken0
             volumeToken1
           }
-          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc) {
+          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc
+            where: { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
+          ) {
             id
             totalValueLockedToken0
             totalValueLockedToken1
