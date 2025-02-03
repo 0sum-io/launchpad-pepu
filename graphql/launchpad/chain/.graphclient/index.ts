@@ -8794,7 +8794,7 @@ export const PoolPriceAndVolumeDocument = gql`
     ` as unknown as DocumentNode<PoolPriceAndVolumeQuery, PoolPriceAndVolumeQueryVariables>;
 export const GetAllPresalesDocument = gql`
     query GetAllPresales {
-  presales {
+    presales(first: 20, orderBy: blockNumber, orderDirection: desc) { 
     id
     data
     name
