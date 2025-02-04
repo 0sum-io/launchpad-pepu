@@ -65,7 +65,6 @@ const WalletControlLazy = ({ left = "-100px" }: { left?: string }) => {
     const accountBalances = walletHoldingsJson.data.accountBalances;
     const tokenIds = accountBalances.map(balance => balance.token.id.toLowerCase());
 
-    console.log(tokenIds); // Outputs an array of token IDs
     const allWalletTokens = await fetchTokenData(tokenIds);
 
     // Find out amount of each token via balanceOf calls
