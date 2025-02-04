@@ -11,7 +11,7 @@ import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
   let [dexPrice, setDexPrice] = useState(0);
-  let [paginationPageNumber, setPaginationPageNumber] = useState(0);
+  let [paginationPageNumber, setPaginationPageNumber] = useState(1);
   let [loadingNewPage, setLoadingNewPage] = useState(true);
 
   // Quoter params
@@ -47,7 +47,7 @@ const Stats24H = () => {
         query GetHighestPriceToken {
           pools(
             orderBy: totalValueLockedETH,
-            orderDirection: desc, first: 50, skip: ${paginationPageNumber}
+            orderDirection: desc, first: 50, skip: ${paginationPageNumber * 50}
           ) {
             id
             totalValueLockedETH
@@ -182,7 +182,7 @@ const Stats24H = () => {
               (
                 highestPriceTokensOut?.map((item) => {
                   return (
-                    <TableBodyRow key={item.id} onClick={() => window.location.href=`/${item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id}`}>
+                    <TableBodyRow key={item.id}>
                         <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
                           <StyledImage src={item?.iconUrl} />
                           <p style={{ paddingLeft: "10px" }}>{
@@ -274,9 +274,9 @@ const Stats24H = () => {
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <ScrollButtonPagination onClick={() => {
           let paginationNmbr = paginationPageNumber;
-          if (paginationNmbr >= 50) {
-            paginationNmbr = paginationNmbr - 50;
-            setPaginationPageNumber(paginationNmbr);
+          if (paginationNmbr > 1) {
+            paginationNmbr = paginationNmbr - 1;
+            setPaginationPageNumber(paginationNmbr)
           }
         }}>
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "rotateY(180deg)" }}>
@@ -289,18 +289,10 @@ const Stats24H = () => {
             />
           </svg>
         </ScrollButtonPagination>
-        {
-          paginationPageNumber >= 51 && 
-            <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> { paginationPageNumber/50 } </span>
-        }
-        {
-          paginationPageNumber == 0 && 
-            <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> 1 </span>
-          
-        }
+        <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> { paginationPageNumber } </span>
 
         <ScrollButtonPagination onClick={() => {
-            let paginationNmbr = paginationPageNumber + 50;
+            let paginationNmbr = paginationPageNumber + 1;
             setPaginationPageNumber(paginationNmbr);
           }}>
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
