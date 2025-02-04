@@ -27,7 +27,8 @@ const LatestPurchasesTicker = () => {
         newDataSet.push(singleSwap);
       }
 
-      setData(newDataSet);
+      // filter out where name.length > 100 characters
+      setData(newDataSet.filter((item) => item.name.length <= 100));
     };
 
     updateData();
