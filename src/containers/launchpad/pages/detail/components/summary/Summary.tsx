@@ -32,7 +32,6 @@ const SummarySection = ({ presale }: { presale: ParsedPresale }) => {
   const isMobile = useCheckIsMobile();
   const raisedAmount = useRaisedAmount(presale);
   const progress = useBondingCurveProgress(presale);
-  console.log("progress", progress);
   const [dexPrice, setDexPrice] = useState(0);
   const [tokenMarketCap, setTokenMarketCap] = useState(0);
 

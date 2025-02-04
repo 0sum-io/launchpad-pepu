@@ -20,9 +20,8 @@ const Stats24H = () => {
   // Check PEPU price and set initial market cap
   useEffect(() => {
     const fetchDexPrice = async () => {
-      /* const price = await fetchQuote();
-      setDexPrice(parseFloat(price)); */
-      setDexPrice(0.01223);
+      const price = await fetchQuote();
+      setDexPrice(parseFloat(price));
     };
     fetchDexPrice();
   }, []);
@@ -35,7 +34,6 @@ const Stats24H = () => {
 
   // Fetch highest price pool on pagination change
   useEffect(() => {
-    console.log("paginationPageNumber", paginationPageNumber);
     fetchPoolWithHighestPrice();
   }, [paginationPageNumber]);
 
