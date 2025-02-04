@@ -45,7 +45,7 @@ const Stats24H = () => {
         query GetHighestPriceToken {
           pools(
             orderBy: totalValueLockedETH,
-            orderDirection: desc, first: 50, skip: ${paginationPageNumber * 50}
+            orderDirection: desc, first: 50, skip: ${paginationPageNumber * 49}
           ) {
             id
             totalValueLockedETH
