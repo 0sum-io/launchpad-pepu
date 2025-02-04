@@ -2,16 +2,8 @@ import { inDesktop, Spacing } from "@boxfoxs/bds-web";
 import { isMobile } from "@boxfoxs/next";
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
-import { formatUnits } from "@ethersproject/units";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { LoadingLottie } from "components/lotties/LoadingLottie";
-import { useQuoterContract } from "contracts/evm/contract/UniswapV3SwapQuoterContract";
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  differenceInSeconds,
-} from "date-fns";
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
 import { useEffect, useState } from "react";
 import { formatDecimals} from "utils/format";
@@ -42,7 +34,6 @@ const Stats24H = () => {
 
   // Fetch highest price pool on pagination change
   useEffect(() => {
-    console.log("paginationPageNumber", paginationPageNumber);
     fetchPoolWithHighestPrice();
   }, [paginationPageNumber]);
 
@@ -52,29 +43,12 @@ const Stats24H = () => {
 
     const query = `
         query GetHighestPriceToken {
-          poolsByToken0Volume: pools(orderBy: totalValueLockedToken0, orderDirection: desc, first: 10, skip: ${paginationPageNumber}
-            where: { token0_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
+          pools(
+            orderBy: totalValueLockedETH,
+            orderDirection: desc, first: 50, skip: ${paginationPageNumber * 49}
           ) {
             id
-            totalValueLockedToken0
-            totalValueLockedToken1
-            token1 {
-              name
-              symbol
-              id
-            }
-            token0 {
-              name
-              symbol
-              id
-            }
-            volumeToken0
-            volumeToken1
-          }
-          poolsByToken1Volume: pools(orderBy: totalValueLockedToken1, orderDirection: desc, first: 10, skip: ${paginationPageNumber}
-            where: { token1_: { id: "${process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY}" } }
-          ) {
-            id
+            totalValueLockedETH
             totalValueLockedToken0
             totalValueLockedToken1
             token1 {
@@ -101,15 +75,14 @@ const Stats24H = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    const highestTVLTokens = findAllTVLTokensSorted(highestPriceTokenJson.data);
-    console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
-
     // Fetch presale data for highestTVLTokens
-    const tokenDatas = await fetchPresales(highestTVLTokens);
+    const tokenDatas = await fetchPresales(highestPriceTokenJson.data.pools);
     // console.log("tokenDatas >>>>>>>>", tokenDatas);
 
-    // Match same token with presale data and put 'data' from presale to token
-    for (let token of highestTVLTokens) {
+    // Match same token with presale data and put 'data' from presale to token and
+    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
+    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
+    for (let token of highestPriceTokenJson.data.pools) {
       const tokenData = tokenDatas.find((t) => t.id === token.id);
       if (tokenData) {
         token['iconUrl'] = tokenData.data.iconUrl;
@@ -117,13 +90,13 @@ const Stats24H = () => {
 
         // Set initial market cap that is totalValueLocked * dexPrice
         token['initialMarketCap'] = 50 * dexPrice;
-        token['marketCap'] = token.totalValueLocked * dexPrice;
+        token['marketCap'] = parseFloat(token.totalValueLockedETH) * dexPrice;
       }
     }
 
     // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
     // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
-    for (let token of highestTVLTokens) {
+    for (let token of highestPriceTokenJson.data.pools) {
       if (token.token0.symbol === "WPEPU") {
         token['volume'] = parseFloat(token.volumeToken0) * dexPrice;
         if (token.totalValueLocked === 0) {
@@ -141,49 +114,8 @@ const Stats24H = () => {
       }
     }
 
-    // console.log("highestTVLTokens 24H list >>>>>>>>", highestTVLTokens);
-    setHighestPriceTokensOut(highestTVLTokens);
-    // We need iconUrl and description from presale data
-  };
-
-  function findAllTVLTokensSorted(data, tokenSymbol = "WPEPU") {
-    let tvlTokens = [];
-    let seenIds = new Set();
-
-    // Iterate through both pools lists
-    const poolLists = [data.poolsByToken0Volume, data.poolsByToken1Volume];
-
-    for (const poolList of poolLists) {
-        for (const pool of poolList) {
-            // Check both token0 and token1
-            for (const tokenKey of ["token0", "token1"]) {
-                const token = pool[tokenKey];
-                const tvlKey = tokenKey === "token0" ? "totalValueLockedToken0" : "totalValueLockedToken1";
-
-                if (token.symbol === tokenSymbol) {
-                    const tvl = parseFloat(pool[tvlKey]);
-
-                    // Avoid duplicates by checking pool ID
-                    if (!seenIds.has(pool.id)) {
-                        tvlTokens.push({
-                            id: pool.id,
-                            token0: pool.token0,  // Full token0 data
-                            token1: pool.token1,  // Full token1 data
-                            totalValueLockedToken0: pool.totalValueLockedToken0,
-                            totalValueLockedToken1: pool.totalValueLockedToken1,
-                            totalValueLocked: tvl,  // Store TVL for sorting
-                            volumeToken0: pool.volumeToken0,
-                            volumeToken1: pool.volumeToken1
-                        });
-                        seenIds.add(pool.id);
-                    }
-                }
-            }
-        }
-    }
-
-    // Sort by totalValueLocked in descending order (highest to lowest)
-    return tvlTokens.sort((a, b) => b.totalValueLocked - a.totalValueLocked);
+    // console.log("highestTVLTokens 24H list >>>>>>>>", highestPriceTokenJson.data.pools);
+    setHighestPriceTokensOut(highestPriceTokenJson.data.pools);
   };
 
   // When we have highestPriceTokensOut, fetch presale data for them
@@ -248,7 +180,7 @@ const Stats24H = () => {
               (
                 highestPriceTokensOut?.map((item) => {
                   return (
-                    <TableBodyRow key={item.id} onClick={() => window.location.href=`/${item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id}`}>
+                    <TableBodyRow key={item.id}>
                         <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
                           <StyledImage src={item?.iconUrl} />
                           <p style={{ paddingLeft: "10px" }}>{
@@ -260,7 +192,7 @@ const Stats24H = () => {
                             <>
                               ${commaizeNumber(
                                 formatDecimals(
-                                  Math.abs(item.totalValueLocked * dexPrice),
+                                  Math.abs(item.marketCap),
                                   2
                                 )
                               )}
@@ -355,12 +287,11 @@ const Stats24H = () => {
             />
           </svg>
         </ScrollButtonPagination>
-
         <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> { paginationPageNumber } </span>
 
         <ScrollButtonPagination onClick={() => {
             let paginationNmbr = paginationPageNumber + 1;
-            setPaginationPageNumber(paginationNmbr)
+            setPaginationPageNumber(paginationNmbr);
           }}>
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
