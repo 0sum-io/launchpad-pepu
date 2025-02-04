@@ -34,8 +34,8 @@ export function Steps() {
       return;
     }
     const error = {
-      name: form.value.name ? false : "Please enter a name",
-      symbol: form.value.symbol ? false : "Please enter a symbol",
+      name: form.value.name && form.value.name.length < 100 ? false : "Please enter a name",
+      symbol: form.value.symbol && form.value.name.length < 100 ? false : "Please enter a symbol",
       websiteUrl:
         !form.value.websiteUrl || form.value.websiteUrl.startsWith("http")
           ? false
