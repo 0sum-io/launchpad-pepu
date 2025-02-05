@@ -11,7 +11,7 @@ import { pressableStyle } from "utils/style";
 
 const Stats24H = () => {
   let [dexPrice, setDexPrice] = useState(0);
-  let [paginationPageNumber, setPaginationPageNumber] = useState(1);
+  let [paginationPageNumber, setPaginationPageNumber] = useState(0);
   let [loadingNewPage, setLoadingNewPage] = useState(true);
 
   // Quoter params
@@ -272,7 +272,7 @@ const Stats24H = () => {
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <ScrollButtonPagination onClick={() => {
           let paginationNmbr = paginationPageNumber;
-          if (paginationNmbr > 1) {
+          if (paginationNmbr > 0) {
             paginationNmbr = paginationNmbr - 1;
             setPaginationPageNumber(paginationNmbr)
           }
@@ -287,7 +287,7 @@ const Stats24H = () => {
             />
           </svg>
         </ScrollButtonPagination>
-        <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> { paginationPageNumber } </span>
+        <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> {  1 + paginationPageNumber } </span>
 
         <ScrollButtonPagination onClick={() => {
             let paginationNmbr = paginationPageNumber + 1;
