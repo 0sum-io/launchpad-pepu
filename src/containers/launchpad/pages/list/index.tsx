@@ -30,11 +30,15 @@ export default function HomePage() {
   let [loadingNewPage, setLoadingNewPage] = useState(false);
 
   const list = useMemo(
-    () =>
-      keyword
-        ? filteredList
-        : sortedPresales,
-    [keyword, sortedPresales]
+    () => {
+      if (keyword) {
+        return filteredList;
+      } else {
+        setLoadingNewPage(false);
+        return sortedPresales;
+      }
+    },
+    [keyword, filteredList, sortedPresales]
   );
 
   // Check if user already seen the dialog, use local storage to store the state
@@ -47,15 +51,15 @@ export default function HomePage() {
 
   // Fetch filtered presales by keyword
   useEffect(() => {
-    if (!keyword) return;
-    setLoadingNewPage(true);
-
-    const timeout = setTimeout(() => {
-      console.log("keyword fetching presales...", keyword);
-      fetchPresales(keyword);
-    }, 3000);
-
-    return () => clearTimeout(timeout); // Clear timeout on keyword change
+    if (keyword.length > 0) {
+      setLoadingNewPage(true);
+  
+      const timeout = setTimeout(() => {
+        fetchPresales(keyword);
+      }, 3000);
+  
+      return () => clearTimeout(timeout); // Clear timeout on keyword change
+    }
     }, [keyword]);
 
   const scrollRef = useRef(null);
@@ -91,7 +95,7 @@ export default function HomePage() {
   const fetchPresales = async (keyword) => {
     const query = `
       query GetTokensData {
-        presales(where: { name_contains: "${keyword}" }) {
+        presales(where: { name_contains: "${keyword}" }, orderBy: blockNumber) {
           id
           data
           name
