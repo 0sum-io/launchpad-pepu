@@ -2,14 +2,17 @@ import { inDesktop, Spacing } from "@boxfoxs/bds-web";
 import { isMobile } from "@boxfoxs/next";
 import { commaizeNumber } from "@boxfoxs/utils";
 import styled from "@emotion/styled";
+import { parseEther } from "@ethersproject/units";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { LoadingLottie } from "components/lotties/LoadingLottie";
+import { ethers } from "ethers";
 import { fetchQuote } from "hooks/on-chain/useDexPrice";
 import { useEffect, useState } from "react";
 import { formatDecimals} from "utils/format";
+import { getV3BondedPrice } from "utils/getV3BondedPrice";
 import { pressableStyle } from "utils/style";
 
-const Stats24H = () => {
+const BondedTokens = () => {
   let [dexPrice, setDexPrice] = useState(0);
   let [paginationPageNumber, setPaginationPageNumber] = useState(0);
   let [loadingNewPage, setLoadingNewPage] = useState(true);
@@ -43,26 +46,15 @@ const Stats24H = () => {
 
     const query = `
         query GetHighestPriceToken {
-          pools(
-            orderBy: totalValueLockedETH,
-            orderDirection: desc, first: 50, skip: ${paginationPageNumber * 49}
+          presales (
+            where: { isEnd: true },
+            first: 50, skip: ${paginationPageNumber * 49}
           ) {
-            id
-            totalValueLockedETH
-            totalValueLockedToken0
-            totalValueLockedToken1
-            token1 {
-              name
-              symbol
-              id
-            }
-            token0 {
-              name
-              symbol
-              id
-            }
-            volumeToken0
-            volumeToken1
+            name
+            data
+            token
+            isEnd
+            totalSupply
           }
         }
     `;
@@ -75,88 +67,47 @@ const Stats24H = () => {
       body: JSON.stringify({ query }),
     }).then((res) => res.json());
 
-    // Fetch presale data for highestTVLTokens
-    const tokenDatas = await fetchPresales(highestPriceTokenJson.data.pools);
-    // console.log("tokenDatas >>>>>>>>", tokenDatas);
-
-    // Match same token with presale data and put 'data' from presale to token and
-    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
-    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
-    for (let token of highestPriceTokenJson.data.pools) {
-      const tokenData = tokenDatas.find((t) => t.id === token.id);
-      if (tokenData) {
-        token['iconUrl'] = tokenData.data.iconUrl;
-        token['description'] = tokenData.data.description;
-
-        // Set initial market cap that is totalValueLocked * dexPrice
-        token['initialMarketCap'] = 50 * dexPrice;
-        token['marketCap'] = parseFloat(token.totalValueLockedETH) * dexPrice;
-      }
-    }
-
-    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
-    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
-    for (let token of highestPriceTokenJson.data.pools) {
-      if (token.token0.symbol === "WPEPU") {
-        token['volume'] = parseFloat(token.volumeToken0) * dexPrice;
-        if (token.totalValueLocked === 0) {
-          token['xChange'] = 0;
-        } else {
-          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
-        }
-      } else {
-        token['volume'] = parseFloat(token.volumeToken1) * dexPrice;
-        if (token.totalValueLocked === 0) {
-          token['xChange'] = 0;
-        } else {
-          token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
-        }
-      }
-    }
-
-    // console.log("highestTVLTokens 24H list >>>>>>>>", highestPriceTokenJson.data.pools);
-    setHighestPriceTokensOut(highestPriceTokenJson.data.pools);
-  };
-
-  // When we have highestPriceTokensOut, fetch presale data for them
-  const fetchPresales = async (tokenObjects: any) => {
-    const tokenIds = tokenObjects.map((token) => {
-      if (token.token0.symbol === "WPEPU") {
-        return token.token1.id;
-      } else {
-        return token.token0.id;
-      }
-    });
-
-    const query = `
-      query GetTokensData {
-        presales(where: { token_in: [${tokenIds.map(id => `"${id}"`).join(",")}] }) {
-          id
-          data
-          name
-          symbol
-          token
-        }
-      }
-    `;
-
-    const tokensDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    }).then((res) => res.json());
-
     // Every token tokenDataJson.data.presales have data atribute that needs to be JSON.parse
-    tokensDataJson.data.presales.forEach((presale) => {
+    highestPriceTokenJson.data.presales.forEach((presale) => {
       presale.data = JSON.parse(presale.data);
     });
 
-    // Loading is completed
-    setLoadingNewPage(false);
+    // Match same token with presale data and put 'data' from presale to token and
+    // calculate token performance naming it "xChange" using initialMarketCap and marketCap
+    for (let token of highestPriceTokenJson.data.presales) {
+      // Wait for token price to be fetched from DEX
+      let tokenPrice;
+      // Check what token is NOT WPEPU and set tokenPrice
+      tokenPrice = await fetchDexPrice(token.token);
+      tokenPrice = ethers.utils.formatEther(tokenPrice);
 
-    return tokensDataJson.data.presales;
+      const totalTokenSupply = ethers.utils.formatEther(token.totalSupply);
+
+      token['iconUrl'] = token.data.iconUrl;
+      token['description'] = token.data.description;
+
+      // Set initial market cap that is totalValueLocked * dexPrice
+      token['initialMarketCap'] = 1200;
+      token['marketCap'] = parseFloat(totalTokenSupply) * tokenPrice * dexPrice;
+    }
+
+    // Check if token0 or token1 is WPEPU and after that set "volume" attribute from volumeToken0 or volumeToken1 that corresponds to WPEPU
+    // and calculate token performance naming it "xChange" using initialMarketCap and marketCap
+    for (let token of highestPriceTokenJson.data.presales) {
+      token['xChange'] = ((token.marketCap - token.initialMarketCap) / token.initialMarketCap) * 100;
+    }
+
+    // Sort by marketCap
+    highestPriceTokenJson.data.presales.sort((a, b) => b.marketCap - a.marketCap);
+
+    // console.log("highestTVLTokens 24H list >>>>>>>>", highestPriceTokenJson.data.presales);
+    setHighestPriceTokensOut(highestPriceTokenJson.data.presales);
+    setLoadingNewPage(false);
+  };
+
+  const fetchDexPrice = async (address) => {
+    const bondedPrice = getV3BondedPrice(address);
+    return bondedPrice;
   };
 
   return (
@@ -168,7 +119,7 @@ const Stats24H = () => {
               <tr>
                 <TableHeader> Token name </TableHeader>
                 <TableHeader> Marketcap </TableHeader>
-                <TableHeader> 24h Volume </TableHeader>
+                {/* <TableHeader> 24h Volume </TableHeader> */}
                 <TableHeader> Performance </TableHeader>
                 <TableHeader> Info </TableHeader>
               </tr>
@@ -181,13 +132,13 @@ const Stats24H = () => {
                 highestPriceTokensOut?.map((item) => {
                   return (
                     <TableBodyRow key={item.id}>
-                        <TableBody width={23} style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                        <TableBody width={30} style={{ display: "flex", alignItems: "center", width: "100%" }}>
                           <StyledImage src={item?.iconUrl} />
                           <p style={{ paddingLeft: "10px" }}>{
-                            item.token0.symbol != "WPEPU" ? item.token0.name : item.token1.name
+                            item.name
                           }</p>
                         </TableBody>
-                        <TableBody width={23}>
+                        <TableBody width={30}>
                           {item.marketCap && (
                             <>
                               ${commaizeNumber(
@@ -203,7 +154,7 @@ const Stats24H = () => {
                           )}
                         </TableBody>
     
-                        <TableBody width={23}>
+                        {/* <TableBody width={23}>
                           {item.volume && (
                             <>
                               ${commaizeNumber(
@@ -217,9 +168,9 @@ const Stats24H = () => {
                           {(!item.hasOwnProperty("volume")) && (
                             <LoadingLottie width={18} />
                           )}
-                        </TableBody>
+                        </TableBody> */}
     
-                        <TableBody width={23}>
+                        <TableBody width={30}>
                           {item.xChange && (
                             <>
                               {commaizeNumber(
@@ -235,10 +186,10 @@ const Stats24H = () => {
                           )}
                         </TableBody>
     
-                        <TableBody width={8}>
+                        <TableBody width={10}>
                           <a
                             href={`/${
-                              item.token0.symbol != "WPEPU" ? item.token0.id : item.token1.id
+                              item.token
                             }`}
                             rel="noreferrer"
                           >
@@ -289,7 +240,7 @@ const Stats24H = () => {
         </ScrollButtonPagination>
         <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> {  1 + paginationPageNumber } </span>
 
-        {highestPriceTokensOut.length > 49 ?
+        {highestPriceTokensOut.length > 49 ? 
           <ScrollButtonPagination onClick={() => {
               let paginationNmbr = paginationPageNumber + 1;
               setPaginationPageNumber(paginationNmbr);
@@ -310,7 +261,7 @@ const Stats24H = () => {
   );
 }
 
-export default Stats24H;
+export default BondedTokens;
 
 const TableHeader = styled.th`
   color: #fff;
