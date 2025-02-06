@@ -49,7 +49,9 @@ export default function HomePage() {
   useEffect(() => {
     if (keyword) {
       setLoadingNewPage(true);
-      fetchPresales(keyword);
+      setTimeout(() => {
+        fetchPresales(keyword);
+      }, 3000);
     }
   }, [keyword]);
 
