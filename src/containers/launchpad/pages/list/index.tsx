@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from 'next/dynamic';
 import { hoverableStyle, pressableStyle } from "utils/style";
 import Link from "next/link";
+import { LoadingLottie } from "components/lotties/LoadingLottie";
 
 const FeaturedSection = dynamic(() => import('./components/FeaturedSection'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
@@ -23,17 +24,15 @@ const MainPageStatistics = dynamic(() => import('./components/statistics/MainSta
 export default function HomePage() {
   const isMobile = useCheckIsMobile();
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [filteredList, setFilteredList] = useState([]);
   const sortedPresales = useSortedPresaleList();
   const [keyword, setKeyword] = useState("");
+  let [loadingNewPage, setLoadingNewPage] = useState(false);
+
   const list = useMemo(
     () =>
       keyword
-        ? sortedPresales.filter(
-            (i) =>
-              i.name?.toLowerCase().includes(keyword.toLowerCase()) ||
-              i.symbol?.toLowerCase().includes(keyword.toLowerCase()) ||
-              i.data.description?.toLowerCase().includes(keyword.toLowerCase())
-          )
+        ? filteredList
         : sortedPresales,
     [keyword, sortedPresales]
   );
@@ -45,6 +44,14 @@ export default function HomePage() {
       setDialogOpen(true);
     }
   }, []);
+
+  // Fetch filtered presales by keyword
+  useEffect(() => {
+    if (keyword) {
+      setLoadingNewPage(true);
+      fetchPresales(keyword);
+    }
+  }, [keyword]);
 
   const scrollRef = useRef(null);
 
@@ -75,6 +82,48 @@ export default function HomePage() {
     }
   };
 
+  // On search fetch presale data by string
+  const fetchPresales = async (keyword) => {
+    const query = `
+      query GetTokensData {
+        presales(where: { name_contains: "${keyword}" }) {
+          id
+          data
+          name
+          pairAddress
+          paymentToken
+          presaleAmount
+          saleAmount
+          symbol
+          token
+          totalSupply
+          transactionHash
+          blockTimestamp
+          blockNumber
+          minter
+        }
+      }
+    `;
+
+    const tokensDataJson = await fetch(process.env.NEXT_PUBLIC_GRAPH_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    }).then((res) => res.json());
+
+    // Every token tokenDataJson.data.presales have data atribute that needs to be JSON.parse
+    tokensDataJson.data.presales.forEach((presale) => {
+      presale.data = JSON.parse(presale.data);
+    });
+
+    // Loading is completed
+    setLoadingNewPage(false);
+
+    setFilteredList(tokensDataJson.data.presales);
+  };
+
   return (
     <div>
       <PageContainer>
@@ -89,37 +138,66 @@ export default function HomePage() {
           </ContentSubContainer>
           <Spacing height={isMobile ? 48 : 32} />
 
-          <GridListContainer ref={scrollRef}>
-            {list?.map((presale) => (
-              <a href={`/${presale.token}`} key={presale.token} style={{ whiteSpace: "normal" }}>
-                <SaleCard key={presale.id} data={presale} />
-              </a>
-            ))}
-          </GridListContainer>
+          {
+            !loadingNewPage && (
+              <>
+                {
+                  list.length > 0 && (
+                    <>
+                      <GridListContainer ref={scrollRef}>
+                        {list?.map((presale) => (
+                          <a href={`/${presale.token}`} key={presale.token} style={{ whiteSpace: "normal" }}>
+                            <SaleCard key={presale.id} data={presale} />
+                          </a>
+                        ))}
+                      </GridListContainer>
+            
+                      <ScrollButton onClick={() => handleScroll("left")} style={isMobile ? {left: "25%"} : {left: "50px"}}>
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "rotateY(180deg)" }}>
+                          <path
+                            d="M9 6l6 6-6 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </ScrollButton>
+            
+                      <ScrollButton onClick={() => handleScroll("right")} style={isMobile ? {right: "25%"} : {right: "50px"}}>
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M9 6l6 6-6 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </ScrollButton>
+                    </>
+                  )
+                }
 
-          <ScrollButton onClick={() => handleScroll("left")} style={isMobile ? {left: "25%"} : {left: "50px"}}>
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: "rotateY(180deg)" }}>
-              <path
-                d="M9 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </ScrollButton>
+                {
+                  list.length == 0 && (
+                    <p style={{ textAlign: "center", color: "#fff", fontSize: "18px" }}> No Tokens Found </p> 
+                  )
+                }
+              </>
+            )
+          }
 
-          <ScrollButton onClick={() => handleScroll("right")} style={isMobile ? {right: "25%"} : {right: "50px"}}>
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M9 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </ScrollButton>
+          {
+            loadingNewPage && (
+              <>
+                <Spacing height={28} />
+                <LoadingLottie width={36} />
+                <Spacing height={28} />
+              </>
+            )
+          }
+
           <Spacing height={isMobile ? 64 : 32} />
 
         </ContentContainer>
