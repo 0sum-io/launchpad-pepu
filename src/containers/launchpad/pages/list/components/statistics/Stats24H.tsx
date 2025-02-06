@@ -289,20 +289,22 @@ const Stats24H = () => {
         </ScrollButtonPagination>
         <span style={{ fontSize: "18px", color: "#fff", margin: "0 50px" }}> {  1 + paginationPageNumber } </span>
 
-        <ScrollButtonPagination onClick={() => {
-            let paginationNmbr = paginationPageNumber + 1;
-            setPaginationPageNumber(paginationNmbr);
-          }}>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M9 6l6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </ScrollButtonPagination>
+        {highestPriceTokensOut.length > 49 ?
+          <ScrollButtonPagination onClick={() => {
+              let paginationNmbr = paginationPageNumber + 1;
+              setPaginationPageNumber(paginationNmbr);
+            }}>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </ScrollButtonPagination>
+        : <></>}
       </div>
     </div>
   );
