@@ -95,7 +95,7 @@ export default function HomePage() {
   const fetchPresales = async (keyword) => {
     const query = `
       query GetTokensData {
-        presales(where: { name_contains: "${keyword}" }, orderBy: blockNumber) {
+        presales(where: { name_contains_nocase: "${keyword}" }, orderBy: blockNumber) {
           id
           data
           name
