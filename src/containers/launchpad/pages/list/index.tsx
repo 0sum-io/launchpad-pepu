@@ -47,13 +47,16 @@ export default function HomePage() {
 
   // Fetch filtered presales by keyword
   useEffect(() => {
-    if (keyword) {
-      setLoadingNewPage(true);
-      setTimeout(() => {
-        fetchPresales(keyword);
-      }, 3000);
-    }
-  }, [keyword]);
+    if (!keyword) return;
+    setLoadingNewPage(true);
+
+    const timeout = setTimeout(() => {
+      console.log("keyword fetching presales...", keyword);
+      fetchPresales(keyword);
+    }, 3000);
+
+    return () => clearTimeout(timeout); // Clear timeout on keyword change
+    }, [keyword]);
 
   const scrollRef = useRef(null);
 
