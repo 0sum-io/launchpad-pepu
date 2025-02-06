@@ -9,29 +9,34 @@ const Stats24H = dynamic(() => import('./Stats24H'), {
   loading: () => <p>Loading...</p>, // Optional fallback while loading
 });
 
+const BondedTokens = dynamic(() => import('./BondedTokens'), {
+  loading: () => <p>Loading...</p>, // Optional fallback while loading
+});
+
 const MainPageStatistics = () => {
-  const [tab, setTab] = useState<"24H">("24H");
-  // const [tab, setTab] = useState<"24H" | "Traders">("24H");
+  // const [tab, setTab] = useState<"24H">("24H");
+  const [tab, setTab] = useState<"24H" | "Bonded">("24H");
 
   return (
     <div>
       <Spacing height={20} width={8} />
       <Container>
         {/* <Flex.CenterVertical style={{ width: "100%", marginLeft: "auto" }}> */}
-          <TabItem active={tab === "24H"} onClick={() => setTab("24H")} style={{ width: "40px" }}>
-            24H
+        <div style={{ display: "flex" }}>
+          <TabItem active={tab === "24H"} onClick={() => setTab("24H")} style={{ marginRight: "40px" }}>
+            Top Tokens
           </TabItem>
-          {/* <TabItem active={tab === "Traders"} onClick={() => setTab("Traders")}>
-            1H
-          </TabItem> */}
+          <TabItem active={tab === "Bonded"} onClick={() => setTab("Bonded")}>
+            Bonded
+          </TabItem>
+        </div>
         {/* </Flex.CenterVertical> */}
         <TableContainer>
-          <Stats24H />
-          {/* {tab === "24H" ? (
-            <Stats24H data={presale} />
+          {tab === "24H" ? (
+            <Stats24H />
           ) : (
-            <TopTraders data={presale} />
-          )} */}
+            <BondedTokens />
+          )}
         </TableContainer>
       </Container>
     </div>
@@ -77,7 +82,7 @@ export const TabItem = styled.button<{ active?: boolean }>`
   font-size: 14px;
   font-weight: 700;
   height: 57px;
-  max-width: 100px;
+  max-width: 200px;
     ${inDesktop(`
     font-size: 24px;
     padding: 0px 22px;

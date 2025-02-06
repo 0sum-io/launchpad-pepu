@@ -47,8 +47,8 @@ export async function getV3BondedPrice(tokenAddress) {
     provider
   );
   const price = await quoter.callStatic.quoteExactInputSingle({
-    tokenIn: process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY,
-    tokenOut: tokenAddress, // "0xe1936f69f7bc8c97ebb18ddf09e9c77fc7284833",
+    tokenIn: tokenAddress,
+    tokenOut: process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY, // "0xe1936f69f7bc8c97ebb18ddf09e9c77fc7284833",
     fee: 10000,
     recipient: process.env.NEXT_PUBLIC_WRAPPED_NATIVE_CURRENCY,
     deadline: Math.floor(new Date().getTime() / 1000 + 60 * 10),
