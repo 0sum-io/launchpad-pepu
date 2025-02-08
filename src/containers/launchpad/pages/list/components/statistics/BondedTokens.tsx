@@ -12,6 +12,8 @@ import { formatDecimals} from "utils/format";
 import { getV3BondedPrice } from "utils/getV3BondedPrice";
 import { pressableStyle } from "utils/style";
 
+const BLACKLIST_TOKENS = ["0x33c2643b968cf7ada40e26ad0d884b6e9aaf76c3"];
+
 const BondedTokens = () => {
   let [dexPrice, setDexPrice] = useState(0);
   let [paginationPageNumber, setPaginationPageNumber] = useState(0);
@@ -100,8 +102,12 @@ const BondedTokens = () => {
     // Sort by marketCap
     highestPriceTokenJson.data.presales.sort((a, b) => b.marketCap - a.marketCap);
 
-    // console.log("highestTVLTokens 24H list >>>>>>>>", highestPriceTokenJson.data.presales);
-    setHighestPriceTokensOut(highestPriceTokenJson.data.presales);
+    console.log("highestTVLTokens 24H list >>>>>>>>", highestPriceTokenJson.data.presales);
+
+    // filter out tokens that are not in the list
+    const whitelistedTokens = highestPriceTokenJson.data.presales.filter((token) => !BLACKLIST_TOKENS.includes(token.token));
+
+    setHighestPriceTokensOut(whitelistedTokens);
     setLoadingNewPage(false);
   };
 
