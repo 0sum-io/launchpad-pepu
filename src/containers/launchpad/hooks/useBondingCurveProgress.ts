@@ -14,7 +14,7 @@ export function useBondingCurveProgress(presale?: ParsedPresale) {
       }
       const provider = getEVMProvider(presale.chainId);
       const contract = getPresaleManagerContract(
-        addresses[presale.chainId].contract.PresaleManager,
+        addresses[presale.chainId]?.contract?.PresaleManager,
         provider
       );
       const presaleAddress = await contract.getPresale(presale.token);
@@ -36,7 +36,7 @@ export function useRaisedAmount(presale?: ParsedPresale) {
     queryFn: async () => {
       const provider = getEVMProvider(presale.chainId);
       const contract = getPresaleManagerContract(
-        addresses[presale.chainId].contract.PresaleManager,
+        addresses[presale.chainId]?.contract?.PresaleManager,
         provider
       );
       const presaleAddress = await contract.getPresale(presale.token);
