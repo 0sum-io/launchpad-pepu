@@ -46,6 +46,7 @@ export class UniswapV3PresaleMakerContract extends GenericEVMContract {
       data,
       {
         gasPrice,
+        value: parseEther("500")
       }
     );
     const res = await tx.wait();
